@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mr. Bojangles' Collection Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mana-font@latest/css/mana.min.css" />
+    <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
+</head>
+
+<body>
+    <header id="mainHeader">
+        <div class="header-left">
+            <img src="favicon.png" alt="logo" id="headerLogo">
+            <h5>Mr. Bojangles' Collection Manager</h5>
+        </div>
+        <div id="quickLookupContainer">
+            <button id="quickCardSearchButton" class="button secondary-button medium-button">Quick Card
+                Search...</button>
+        </div>
+        <div id="menuBar">
+            <button id="createNewCollectionButton" class="button primary-button medium-button">Create New
+                Collection</button>
+            <button id="loadCollectionButton" class="button secondary-button medium-button">Load Collection</button>
+        </div>
+    </header>
+    <div id="pageContent">
+        <div id="emptyPage" class="display-container full-width has-shadow">
+            <h3>Welcome to your Collection Manager</h3>
+            <p><a onclick="createNewCollection()">Create a new collection</a> or <a onclick="loadCollection()">load an
+                    existing one</a> to start managing your Magic: The Gathering collection.</p>
+        </div>
+        <div id="createCollectionForm" class="display-container third-width has-shadow" style="display: none;">
+            <h3 class="title">Create New Collection</h3>
+            <input type="text" id="collectionName" class="text-input length-max" placeholder="Collection Name">
+            <input type="text" id="collectionDescription" class="text-input length-max"
+                placeholder="Collection Description">
+            <!-- <select id="collectionFormat" class="text-input length-medium">
+                <option value="">Select Format</option>
+                <option value="Standard">Standard</option>
+                <option value="Commander">Commander</option>
+                <option value="Modern">Modern</option>
+            </select> -->
+            <div class="button-group gap-5">
+                <button class="button primary-button medium-button" onclick="createCollection()">Create
+                    Collection</button>
+                <button class="button secondary-button medium-button" onclick="updateUIState()">Cancel</button>
+            </div>
+        </div>
+        <div id="collectionInfo" class="display-container full-width" style="display: none;">
+            <h3 id="collectionNameDisplay">Collection: Unnamed</h3>
+            <p id="collectionDescriptionDisplay" style="display: none;"></p>
+            <button id="editCollectionBtn" class="secondary-button small-button"
+                onclick="openEditCollectionModal()">Edit collection details</button>
+            <br>
+            <p id="collectionCardCount">Total Cards: 0</p>
+            <div class="button-group">
+                <button class="button primary-button medium-button" onclick="openAddCardModal()">Add Cards</button>
+                <button class="button secondary-button medium-button" onclick="saveCollection()">Save
+                    Collection</button>
+                <button class="button secondary-button medium-button" onclick="openImportCardsModal()">Import Cards from
+                    MTG Arena...</button>
+                <button class="button secondary-button medium-button" onclick="unloadCollection()">Unload
+                    Collection</button>
+            </div>
+        </div>
+        <div id="collectionList" class="display-container full-width has-shadow" style="display: none;">
+            <h3 class="title">Collection List</h3>
+            <div class="sort-filter-container">
+                <button id="sortToggleButton" class="secondary-button small-button"
+                    onclick="toggleSortControls()">Sort</button>
+                <button id="filterToggleButton" class="secondary-button small-button"
+                    onclick="toggleFilterControls()">Filter</button>
+            </div>
+            <div id="sortControls" class="sort-controls">
+                <select id="sortCriterion" class="text-input length-medium">
+                    <option value="collector_number" selected>Set Number</option>
+                    <option value="name">Name</option>
+                    <option value="cmc">Mana Cost</option>
+                    <option value="color">Mana Color</option>
+                    <option value="rarity">Rarity</option>
+                </select>
+                <select id="sortDirection" class="text-input length-medium">
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                </select>
+                <button id="resetSortButton" class="button secondary-button small-button">Reset</button>
+            </div>
+            <div id="filterControls" class="filter-controls">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>Color</label>
+                        <div class="gap-5">
+                            <button class="filter-button color-w" onclick="filterByColor('W')">{W}</button>
+                            <button class="filter-button color-u" onclick="filterByColor('U')">{U}</button>
+                            <button class="filter-button color-b" onclick="filterByColor('B')">{B}</button>
+                            <button class="filter-button color-r" onclick="filterByColor('R')">{R}</button>
+                            <button class="filter-button color-g" onclick="filterByColor('G')">{G}</button>
+                            <button class="filter-button color-colorless"
+                                onclick="filterByColor('Colorless')">{C}</button>
+                            <button class="filter-button color-multicolor"
+                                onclick="filterByColor('Multicolor')">Multicolor</button>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Mana Cost</label>
+                        <div class="gap-5">
+                            <button class="filter-button" onclick="filterByManaCost(0)">0</button>
+                            <button class="filter-button" onclick="filterByManaCost(1)">1</button>
+                            <button class="filter-button" onclick="filterByManaCost(2)">2</button>
+                            <button class="filter-button" onclick="filterByManaCost(3)">3</button>
+                            <button class="filter-button" onclick="filterByManaCost(4)">4</button>
+                            <button class="filter-button" onclick="filterByManaCost(5)">5</button>
+                            <button class="filter-button" onclick="filterByManaCost(6)">6</button>
+                            <button class="filter-button" onclick="filterByManaCost(7)">7+</button>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Rarity</label>
+                        <div class="gap-5">
+                            <button class="filter-button-rarity common" id="commonFilterBtn"
+                                onclick="filterByRarity('common')">Common</button>
+                            <button class="filter-button-rarity uncommon" id="uncommonFilterBtn"
+                                onclick="filterByRarity('uncommon')">Uncommon</button>
+                            <button class="filter-button-rarity rare" id="rareFilterBtn"
+                                onclick="filterByRarity('rare')">Rare</button>
+                            <button class="filter-button-rarity mythic" id="mythicFilterBtn"
+                                onclick="filterByRarity('mythic')">Mythic</button>
+                        </div>
+                    </div>
+                    <div id="resetFilterContainer" class="button-group gap-5">
+                        <button class="button secondary-button small-button" onclick="clearFilters()">Clear
+                            Filters</button>
+                    </div>
+                </div>
+            </div>
+            <p id="noCardsInCollectionText">No cards in collection. Click "Add Cards" to start building!</p>
+            <input type="text" id="searchCollectionList" class="text-input bottom-margin-10"
+                placeholder="Search your collection..." style="display: none;">
+            <p id="displayCount" style="display: none;">Displaying 0/0 cards</p>
+            <div id="collectionCardsList" class="card-gallery"></div>
+        </div>
+    </div>
+    <div id="editCollectionModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeEditCollectionModal()">×</span>
+            <h3>Edit collection details</h3>
+            <input type="text" id="editCollectionName" class="text-input" placeholder="Collection Name">
+            <textarea id="editCollectionDescription" class="text-input" placeholder="Description (optional)"></textarea>
+            <div class="button-group">
+                <button class="secondary-button medium-button" onclick="closeEditCollectionModal()">Cancel</button>
+                <button class="primary-button medium-button" onclick="saveCollectionDetails()">Save changes</button>
+            </div>
+        </div>
+    </div>
+    <div id="addCardModal" class="modal">
+        <div class="modal-content">
+            <span class="svg-close-button" onclick="closeAddCardModal()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M6 18L18 6" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </span>
+            <h2 id="addCardModalTitle">Add Card</h2>
+            <input type="text" id="searchInput" class="text-input" placeholder="Search by name..." maxlength="100">
+            <div id="searchResults"></div>
+        </div>
+    </div>
+    <div id="cardDetailsModal" class="card-details-modal"></div>
+    <div id="importCardsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeImportCardsModal()">×</span>
+            <h3>Import Cards from MTG Arena</h3>
+            <p>Paste your copied MTG Arena deck export in the text box below, or click the button to import a .txt file.
+            </p>
+            <textarea id="importCardsText" class="import-textarea"
+                placeholder="Paste your MTG Arena deck export here..."></textarea>
+            <div class="button-group">
+                <button class="button secondary-button medium-button" onclick="uploadImportFile()">Upload
+                    file...</button>
+                <button class="button secondary-button small-button" onclick="clearImportText()">Clear</button>
+                <button class="button primary-button medium-button" onclick="submitImportCards()">Submit</button>
+            </div>
+        </div>
+    </div>
+    <div id="referencesModal" class="references-modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeReferencesModal()">×</span>
+            <h3>References</h3>
+            <ul>
+                <li><a href="https://scryfall.com/" target="_blank">Scryfall</a> - Card search and images</li>
+                <li><a href="https://mana.fontawesome.com/" target="_blank">Mana Font</a> - Mana symbol icons</li>
+                <li><a href="https://fonts.google.com/" target="_blank">Google Fonts</a> - Cinzel and Alegreya fonts
+                </li>
+            </ul>
+            <button class="button secondary-button medium-button" onclick="closeReferencesModal()">Close</button>
+        </div>
+    </div>
+    <footer>
+        <p>Collection Manager v1.2.5 © Mr. Bojangles & Grok 2025 | <a onclick="openReferencesModal()">References</a></p>
+    </footer>
+    <input type="file" id="fileInput" style="display: none;">
+    <script src="script.js"></script>
+</body>
+
+</html>
