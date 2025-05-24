@@ -1,4 +1,4 @@
-This project is designed to help users create collection JSON files of their Magic: teh Gathering card collections.
+This project is designed to help users create collection JSON files of their Magic: the Gathering card collections.
 
 Current stable version: v1.2.5
 
