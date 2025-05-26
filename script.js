@@ -483,7 +483,7 @@ function createNewCollection() {
         searchCollectionList.value = '';
         updateUIState();
         collectionNameInput.focus();
-        showFeedback('Ready to create a new collection!', 'info');
+        // showFeedback('Ready to create a new collection!', 'info'); 
     } catch (error) {
         console.error('Create new collection error:', error);
         showFeedback('Failed to initialize new collection.', 'error');
