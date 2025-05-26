@@ -1731,3 +1731,17 @@ body *::-webkit-scrollbar {
         text-align: center;
     }
 }
+
+@media (forced-colors: active) {
+    /* Adjust colors for high contrast mode */
+    body, .modal, .context-modal-content {
+        background: Canvas;
+        color: CanvasText;
+        border-color: CanvasText;
+    }
+    .button, .primary-button, .secondary-button {
+        background: ButtonFace;
+        color: ButtonText;
+        border-color: ButtonText;
+    }
+}

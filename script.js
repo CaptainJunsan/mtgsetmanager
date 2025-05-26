@@ -36,6 +36,44 @@ const loadCollectionModal = document.getElementById('loadCollectionModal');
 const loadFromGoogleDriveBtn = document.getElementById('loadFromGoogleDriveBtn');
 const uploadFromDeviceBtn = document.getElementById('uploadFromDeviceBtn');
 
+// Google Drive API configuration
+const CLIENT_ID = '1082824817658-ana0620kbg7rqa7krvn7nk06qat39k0e.apps.googleusercontent.com'; // Replace with your OAuth 2.0 Client ID from Google Cloud
+const API_KEY = 'AIzaSyAx6RffiV7cGc-IQlkA2rpEpaOBjUYqxrs'; // Replace with your API Key from Google Cloud
+const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'];
+const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
+
+let tokenClient;
+let accessToken = null;
+
+function initializeGapiClient(retryCount = 0) {
+    gapi.load('client', () => {
+        gapi.client.init({
+            apiKey: API_KEY,
+            discoveryDocs: DISCOVERY_DOCS,
+        }).then(() => {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: (response) => {
+                    if (response.error) {
+                        showFeedback('Google Drive authentication failed: ' + response.error, 'error');
+                        return;
+                    }
+                    accessToken = response.access_token;
+                    loadFileFromGoogleDrive();
+                },
+            });
+        }).catch(error => {
+            console.error('Error initializing gapi client:', error);
+            if (retryCount < 3) { // Retry up to 3 times
+                setTimeout(() => initializeGapiClient(retryCount + 1), 2000 * (retryCount + 1)); // Exponential backoff
+            } else {
+                showFeedback('Failed to initialize Google Drive client after multiple attempts.', 'error');
+            }
+        });
+    });
+}
+
 // Set Default Sorting Order to Set Number, Ascending
 let currentSort = { criterion: 'collector_number', direction: 'asc' };
 
@@ -285,9 +323,67 @@ loadCollectionModal.addEventListener('click', (event) => {
 });
 
 loadFromGoogleDriveBtn.addEventListener('click', () => {
-    showFeedback('Loading from Google Drive... (Coming soon!)', 'info');
+    if (!tokenClient) {
+        showFeedback('Google Drive client not initialized. Please try again.', 'error');
+        return;
+    }
+    if (currentCollection.name !== '' && !confirm('This will overwrite the current collection. Continue?')) {
+        closeLoadCollectionModal();
+        return;
+    }
+    tokenClient.requestAccessToken();
     closeLoadCollectionModal();
 });
+
+function loadFileFromGoogleDrive() {
+    gapi.client.drive.files.list({
+        q: "name contains '.json' and mimeType='application/json'",
+        fields: 'files(id, name)',
+        spaces: 'drive',
+    }).then(response => {
+        const files = response.result.files;
+        if (!files || files.length === 0) {
+            showFeedback('No .json files found in your Google Drive.', 'info');
+            return;
+        }
+        // For simplicity, load the first .json file found
+        const file = files[0];
+        gapi.client.drive.files.get({
+            fileId: file.id,
+            alt: 'media',
+        }).then(fileResponse => {
+            const data = JSON.parse(fileResponse.body);
+            if (!data.name || !Array.isArray(data.cards)) {
+                throw new Error('Invalid collection structure');
+            }
+            currentCollection = {
+                name: data.name || 'Unnamed Collection',
+                description: data.description || '',
+                cards: data.cards.map(c => ({
+                    card: { name: c.name, id: c.id || '' },
+                    quantity: c.quantity || 1,
+                    treatment: c.treatment || 'non-foil'
+                }))
+            };
+            currentFilters = { colors: [], manaCosts: [], rarities: [] };
+            searchCollectionList.value = '';
+            updateCollectionList();
+            showFeedback(`Loaded collection "${currentCollection.name}" from Google Drive.`, 'success');
+            // Save to localStorage as well
+            localStorage.setItem('mtgCollection', JSON.stringify({
+                name: currentCollection.name,
+                description: currentCollection.description,
+                cards: currentCollection.cards.map(({ card, quantity, treatment }) => ({ name: card.name, id: card.id || '', quantity, treatment }))
+            }));
+        }).catch(error => {
+            console.error('Error loading file from Google Drive:', error);
+            showFeedback('Failed to load file from Google Drive: Invalid format.', 'error');
+        });
+    }).catch(error => {
+        console.error('Error listing files from Google Drive:', error);
+        showFeedback('Failed to access Google Drive files.', 'error');
+    });
+}
 
 uploadFromDeviceBtn.addEventListener('click', () => {
     fileInput.accept = '.json';
@@ -1296,4 +1392,5 @@ document.addEventListener('DOMContentLoaded', () => {
         showFeedback(`Sorted by ${sortCriterionSelect.value} (${sortDirectionSelect.value}).`, 'success');
     });
     resetSortButton.addEventListener('click', resetSort);
+    initializeGapiClient();
 });
