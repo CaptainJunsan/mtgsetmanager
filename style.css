@@ -1497,6 +1497,9 @@ body *::-webkit-scrollbar {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     opacity: 0;
     transition: opacity 200ms ease-in-out;
+    left: auto;
+    top: 75px;
+    right: 20px;
 }
 
 .context-modal.active .context-modal-content {

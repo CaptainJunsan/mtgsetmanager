@@ -310,8 +310,8 @@ function openLoadCollectionModal(event) {
     const rect = button.getBoundingClientRect();
     const modalContent = loadCollectionModal.querySelector('.context-modal-content');
     modalContent.style.position = 'absolute';
-    modalContent.style.top = `${rect.bottom + window.scrollY}px`;
-    modalContent.style.left = `${rect.left + window.scrollX}px`;
+    // modalContent.style.top = `${rect.bottom + window.scrollY}px`;
+    // modalContent.style.left = `${rect.left + window.scrollX}px`;
 }
 
 function closeLoadCollectionModal() {
