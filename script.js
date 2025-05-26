@@ -194,6 +194,7 @@ function updateUIState() {
     const filterToggleButton = document.getElementById('filterToggleButton');
     if (filterToggleButton) {
         filterToggleButton.style.display = isCollectionActive && hasCards ? 'inline-block' : 'none';
+        sortToggleButton.style.display = isCollectionActive && hasCards ? 'inline-block' : 'none';
     }
 
     createNewCollectionButton.disabled = isCollectionActive;
