@@ -211,6 +211,14 @@
     <input type="file" id="fileInput" style="display: none;">
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
+    <script>
+        // Load Picker API after gapi is loaded
+        function loadPicker() {
+            gapi.load('picker', () => {
+                console.log('Google Picker API loaded');
+            });
+        }
+    </script>
     <script src="script.js"></script>
 </body>
 

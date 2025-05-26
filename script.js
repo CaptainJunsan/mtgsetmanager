@@ -48,7 +48,7 @@ let tokenClient;
 let accessToken = null;
 
 function initializeGapiClient(retryCount = 0) {
-    gapi.load('client', () => {
+    gapi.load('client:picker', () => { // Load both client and picker
         gapi.client.init({
             apiKey: API_KEY,
             discoveryDocs: DISCOVERY_DOCS,
@@ -59,20 +59,89 @@ function initializeGapiClient(retryCount = 0) {
                 callback: (response) => {
                     if (response.error) {
                         showFeedback('Google Drive authentication failed: ' + response.error, 'error');
+                        console.error('Auth error:', response.error);
                         return;
                     }
                     accessToken = response.access_token;
+                    console.log('Access token obtained:', accessToken);
                     loadFileFromGoogleDrive();
                 },
             });
         }).catch(error => {
             console.error('Error initializing gapi client:', error);
-            if (retryCount < 3) { // Retry up to 3 times
-                setTimeout(() => initializeGapiClient(retryCount + 1), 2000 * (retryCount + 1)); // Exponential backoff
+            if (retryCount < 3) {
+                setTimeout(() => initializeGapiClient(retryCount + 1), 2000 * (retryCount + 1));
             } else {
                 showFeedback('Failed to initialize Google Drive client after multiple attempts.', 'error');
             }
         });
+    });
+}
+
+function createPicker() {
+    if (!accessToken) {
+        showFeedback('Not authenticated. Please try again.', 'error');
+        return;
+    }
+    const view = new google.picker.View(google.picker.ViewId.DOCS);
+    view.setMimeTypes('application/json'); // Only show .json files
+    const picker = new google.picker.PickerBuilder()
+        .enableFeature(google.picker.Feature.NAV_HIDDEN)
+        .setAppId(CLIENT_ID.split('-')[0]) // Project number from Google Cloud
+        .setOAuthToken(accessToken)
+        .addView(view)
+        .setCallback(data => {
+            if (data.action === google.picker.Action.PICKED) {
+                const fileId = data.docs[0].id;
+                console.log('File selected:', data.docs[0].name, 'ID:', fileId);
+                loadFileFromDrive(fileId);
+            } else if (data.action === google.picker.Action.CANCEL) {
+                showFeedback('File selection cancelled.', 'info');
+            }
+        })
+        .build();
+    picker.setVisible(true);
+}
+
+function loadFileFromDrive(fileId) {
+    gapi.client.drive.files.get({
+        fileId: fileId,
+        alt: 'media',
+    }).then(fileResponse => {
+        console.log('File content:', fileResponse.body);
+        let data;
+        try {
+            data = JSON.parse(fileResponse.body);
+        } catch (error) {
+            console.error('JSON parse error:', error);
+            showFeedback('Failed to parse file from Google Drive: Invalid JSON format.', 'error');
+            return;
+        }
+        if (!data.name || !Array.isArray(data.cards)) {
+            console.error('Invalid structure - Expected name:', data.name, 'cards:', data.cards);
+            throw new Error('Invalid collection structure');
+        }
+        currentCollection = {
+            name: data.name || 'Unnamed Collection',
+            description: data.description || '',
+            cards: data.cards.map(c => ({
+                card: { name: c.name, id: c.id || '' },
+                quantity: c.quantity || 1,
+                treatment: c.treatment || 'non-foil'
+            }))
+        };
+        currentFilters = { colors: [], manaCosts: [], rarities: [] };
+        searchCollectionList.value = '';
+        updateCollectionList();
+        showFeedback(`Loaded collection "${currentCollection.name}" from Google Drive.`, 'success');
+        localStorage.setItem('mtgCollection', JSON.stringify({
+            name: currentCollection.name,
+            description: currentCollection.description,
+            cards: currentCollection.cards.map(({ card, quantity, treatment }) => ({ name: card.name, id: c.id || '', quantity, treatment }))
+        }));
+    }).catch(error => {
+        console.error('Error loading file from Google Drive:', error);
+        showFeedback('Failed to load file from Google Drive: Invalid format or network issue.', 'error');
     });
 }
 
@@ -338,53 +407,8 @@ loadFromGoogleDriveBtn.addEventListener('click', () => {
 });
 
 function loadFileFromGoogleDrive() {
-    gapi.client.drive.files.list({
-        q: "name contains '.json' and mimeType='application/json'",
-        fields: 'files(id, name)',
-        spaces: 'drive',
-    }).then(response => {
-        const files = response.result.files;
-        if (!files || files.length === 0) {
-            showFeedback('No .json files found in your Google Drive.', 'info');
-            return;
-        }
-        // For simplicity, load the first .json file found
-        const file = files[0];
-        gapi.client.drive.files.get({
-            fileId: file.id,
-            alt: 'media',
-        }).then(fileResponse => {
-            const data = JSON.parse(fileResponse.body);
-            if (!data.name || !Array.isArray(data.cards)) {
-                throw new Error('Invalid collection structure');
-            }
-            currentCollection = {
-                name: data.name || 'Unnamed Collection',
-                description: data.description || '',
-                cards: data.cards.map(c => ({
-                    card: { name: c.name, id: c.id || '' },
-                    quantity: c.quantity || 1,
-                    treatment: c.treatment || 'non-foil'
-                }))
-            };
-            currentFilters = { colors: [], manaCosts: [], rarities: [] };
-            searchCollectionList.value = '';
-            updateCollectionList();
-            showFeedback(`Loaded collection "${currentCollection.name}" from Google Drive.`, 'success');
-            // Save to localStorage as well
-            localStorage.setItem('mtgCollection', JSON.stringify({
-                name: currentCollection.name,
-                description: currentCollection.description,
-                cards: currentCollection.cards.map(({ card, quantity, treatment }) => ({ name: card.name, id: card.id || '', quantity, treatment }))
-            }));
-        }).catch(error => {
-            console.error('Error loading file from Google Drive:', error);
-            showFeedback('Failed to load file from Google Drive: Invalid format.', 'error');
-        });
-    }).catch(error => {
-        console.error('Error listing files from Google Drive:', error);
-        showFeedback('Failed to access Google Drive files.', 'error');
-    });
+    console.log('Opening Google Drive file picker...');
+    createPicker();
 }
 
 uploadFromDeviceBtn.addEventListener('click', () => {
