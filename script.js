@@ -398,7 +398,7 @@ function openCardDetailsModal(card, treatment, fromSearch = false) {
             <div class="card-details-content">
                 <h3>${card.name}</h3>
                 <p class="mana-text">${replaceManaSymbols(card.mana_cost || '')}</p>
-                <p>${card.type_line || 'Unknown'}</p>
+                <p class="type-line">${card.type_line || 'Unknown'}</p>
                 ${card.power && card.toughness ? `<p>${card.power}/${card.toughness}</p>` : ''}
                 <p class="mana-text">${replaceManaSymbols(card.oracle_text || '')}</p>
                 ${fromSearch && isCollectionActive ? 
@@ -506,7 +506,7 @@ function displaySearchResults(cards) {
         div.innerHTML = `
             <div class="content">
                 <span class="card-name">${card.name}</span>
-                <div>${card.type_line} - ${card.rarity ? card.rarity.charAt(0).toUpperCase() + card.rarity.slice(1) : 'Unknown'}</div>
+                <div class="type-line">${card.type_line} - ${card.rarity ? card.rarity.charAt(0).toUpperCase() + card.rarity.slice(1) : 'Unknown'}</div>
                 ${isCollectionActive ? `
                     <div class="inputs">
                         <input type="number" class="text-input quantity" min="1" max="4" value="1" id="qty-${card.id}">
