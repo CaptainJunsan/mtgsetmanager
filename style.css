@@ -1106,6 +1106,12 @@ p {
     background: #555;
 }
 
+#createDeckModal .modal-content {
+    max-width: 500px;
+    width: 100%;
+    padding: 20px;
+}
+
 .import-textarea {
     width: 100%;
     min-height: 200px;
@@ -1395,6 +1401,11 @@ body *::-webkit-scrollbar {
     font-size: 16px;
     text-align: start;
     width: 100%;
+
+    border-radius: 7px;
+    padding: 10px;
+    border: 1px solid #555;
+    background: #0a0a0a;
 }
 
 #quickLookupResults {

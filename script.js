@@ -35,6 +35,7 @@ const editCollectionDescriptionInput = document.getElementById('editCollectionDe
 const loadCollectionModal = document.getElementById('loadCollectionModal');
 const loadFromGoogleDriveBtn = document.getElementById('loadFromGoogleDriveBtn');
 const uploadFromDeviceBtn = document.getElementById('uploadFromDeviceBtn');
+const createDeckModal = document.getElementById('createDeckModal');
 
 // This is a new comment
 
@@ -47,36 +48,36 @@ const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
 let tokenClient;
 let accessToken = null;
 
-function initializeGapiClient(retryCount = 0) {
-    gapi.load('client:picker', () => { // Load both client and picker
-        gapi.client.init({
-            apiKey: API_KEY,
-            discoveryDocs: DISCOVERY_DOCS,
-        }).then(() => {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: SCOPES,
-                callback: (response) => {
-                    if (response.error) {
-                        showFeedback('Google Drive authentication failed: ' + response.error, 'error');
-                        console.error('Auth error:', response.error);
-                        return;
-                    }
-                    accessToken = response.access_token;
-                    console.log('Access token obtained:', accessToken);
-                    loadFileFromGoogleDrive();
-                },
-            });
-        }).catch(error => {
-            console.error('Error initializing gapi client:', error);
-            if (retryCount < 3) {
-                setTimeout(() => initializeGapiClient(retryCount + 1), 2000 * (retryCount + 1));
-            } else {
-                showFeedback('Failed to initialize Google Drive client after multiple attempts.', 'error');
-            }
-        });
-    });
-}
+// function initializeGapiClient(retryCount = 0) {
+//     gapi.load('client:picker', () => { // Load both client and picker
+//         gapi.client.init({
+//             apiKey: API_KEY,
+//             discoveryDocs: DISCOVERY_DOCS,
+//         }).then(() => {
+//             tokenClient = google.accounts.oauth2.initTokenClient({
+//                 client_id: CLIENT_ID,
+//                 scope: SCOPES,
+//                 callback: (response) => {
+//                     if (response.error) {
+//                         showFeedback('Google Drive authentication failed: ' + response.error, 'error');
+//                         console.error('Auth error:', response.error);
+//                         return;
+//                     }
+//                     accessToken = response.access_token;
+//                     console.log('Access token obtained:', accessToken);
+//                     loadFileFromGoogleDrive();
+//                 },
+//             });
+//         }).catch(error => {
+//             console.error('Error initializing gapi client:', error);
+//             if (retryCount < 3) {
+//                 setTimeout(() => initializeGapiClient(retryCount + 1), 2000 * (retryCount + 1));
+//             } else {
+//                 showFeedback('Failed to initialize Google Drive client after multiple attempts.', 'error');
+//             }
+//         });
+//     });
+// }
 
 function createPicker() {
     if (!accessToken) {
@@ -357,6 +358,7 @@ document.addEventListener('click', (e) => {
     else if (e.target === addCardModal) closeAddCardModal();
     else if (e.target === referencesModal) closeReferencesModal();
     else if (e.target === editCollectionModal) closeEditCollectionModal();
+    else if (e.target === createDeckModal) closeCreateDeckModal();
 });
 
 // References modal handlers
@@ -471,6 +473,24 @@ function openEditCollectionModal() {
     editCollectionModal.classList.add('active');
     editCollectionNameInput.focus();
     showFeedback('Editing collection details.', 'info');
+}
+
+// Open the Create Deck Modal
+function openCreateDeckModal() {
+    console.log('Opening Create Deck modal');
+    createDeckModal.style.display = 'flex';
+    createDeckModal.classList.add('active');
+    // Here you can implement the logic to open a modal for creating a deck
+    // For now, we will just log it
+    // showFeedback('Create Deck functionality is not implemented yet.', 'info');
+}
+
+// Close the Create Deck Modal
+function closeCreateDeckModal() {
+    createDeckModal.classList.remove('active');
+    setTimeout(() => {
+        createDeckModal.style.display = 'none';
+    }, 300);
 }
 
 // Close the Edit Collection Modal
@@ -1419,5 +1439,5 @@ document.addEventListener('DOMContentLoaded', () => {
         showFeedback(`Sorted by ${sortCriterionSelect.value} (${sortDirectionSelect.value}).`, 'success');
     });
     resetSortButton.addEventListener('click', resetSort);
-    initializeGapiClient();
+    // initializeGapiClient();
 });

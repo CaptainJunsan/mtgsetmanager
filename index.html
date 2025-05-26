@@ -66,6 +66,18 @@
                     Collection</button>
             </div>
         </div>
+        <div id="deckControlPanel" class="display-container full-width">
+            <h3 id="deckControlTitle">Deck Control Panel</h3>
+            <div class="button-group">
+                <button class="button primary-button medium-button" onclick="openCreateDeckModal()">Create Deck</button>
+                <select id="deckSelect" class="text-input length-medium" disabled>
+                    <option value="select">Select deck...</option>
+                    <option value="none">No decks to show</option>
+                </select>
+                <button class="button secondary-button medium-button" onclick="noFun()" disabled>Close Deck</button>
+                <button class="button secondary-button medium-button" onclick="noFun()" disabled>Delete Deck</button>
+            </div>
+        </div>
         <div id="collectionList" class="display-container full-width has-shadow" style="display: none;">
             <h3 class="title">Collection List</h3>
             <div class="sort-filter-container">
@@ -155,6 +167,24 @@
             </div>
         </div>
     </div>
+    <div id="createDeckModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeCreateDeckModal()">×</span>
+            <h3>Create deck</h3>
+            <input type="text" id="createDeckName" class="text-input" placeholder="Deck Name">
+            <select id="createDeckFormat" class="text-input length-medium">
+                <option value="">Select Format</option>
+                <option value="Standard">Standard</option>
+                <option value="Commander">Commander</option>
+                <option value="Modern">Modern</option>
+                <option value="Pauper">Pauper</option>
+            </select>
+            <div class="button-group">
+                <button class="secondary-button medium-button" onclick="closeCreateDeckModal()">Cancel</button>
+                <button class="primary-button medium-button" onclick="saveDeckDetails()">Create deck</button>
+            </div>
+        </div>
+    </div>
     <div id="addCardModal" class="modal">
         <div class="modal-content">
             <span class="svg-close-button" onclick="closeAddCardModal()">
@@ -209,7 +239,7 @@
         <p>Collection Manager v1.2.9 © Mr. Bojangles & Grok 2025 | <a onclick="openReferencesModal()">References</a></p>
     </footer>
     <input type="file" id="fileInput" style="display: none;">
-    <script src="https://apis.google.com/js/api.js"></script>
+    <!-- <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
     <script>
         // Load Picker API after gapi is loaded
@@ -218,7 +248,7 @@
                 console.log('Google Picker API loaded');
             });
         }
-    </script>
+    </script> -->
     <script src="script.js"></script>
 </body>
 
