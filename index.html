@@ -29,8 +29,7 @@
     <div id="pageContent">
         <div id="emptyPage" class="display-container full-width has-shadow">
             <h3>Welcome to your Collection Manager</h3>
-            <p><a onclick="createNewCollection()">Create a new collection</a> or <a onclick="loadCollection()">load an
-                    existing one</a> to start managing your Magic: The Gathering collection.</p>
+            <p><a onclick="createNewCollection()">Create a new collection</a> or <a onclick="loadCollection(event)">load an existing one</a> to start managing your Magic: The Gathering collection.</p>
         </div>
         <div id="createCollectionForm" class="display-container third-width has-shadow" style="display: none;">
             <h3 class="title">Create New Collection</h3>
@@ -182,6 +181,14 @@
                 <button class="button secondary-button small-button" onclick="clearImportText()">Clear</button>
                 <button class="button primary-button medium-button" onclick="submitImportCards()">Submit</button>
             </div>
+        </div>
+    </div>
+    <div id="loadCollectionModal" class="context-modal">
+        <div class="context-modal-content">
+            <ul>
+                <li id="loadFromGoogleDriveBtn">Load from Google Drive...</li>
+                <li id="uploadFromDeviceBtn">Upload from device...</li>
+            </ul>
         </div>
     </div>
     <div id="referencesModal" class="references-modal">

@@ -1471,6 +1471,58 @@ body *::-webkit-scrollbar {
     margin-bottom: 0;
 }
 
+.context-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.context-modal.active {
+    display: flex;
+}
+
+.context-modal-content {
+    background: #1a1a1a;
+    border: 1px solid #555;
+    border-radius: 7px;
+    width: 250px;
+    padding: 5px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 200ms ease-in-out;
+}
+
+.context-modal.active .context-modal-content {
+    opacity: 1;
+}
+
+.context-modal-content ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.context-modal-content li {
+    padding: 10px 15px;
+    color: #e0e0e0;
+    font-family: 'Alegreya', Arial, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 200ms ease-in-out;
+}
+
+.context-modal-content li:hover {
+    background: #2a2a2a;
+}
+
 @media (max-width: 768px) {
     .third-width {
         max-width: 100%;

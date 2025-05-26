@@ -32,6 +32,9 @@ const importCardsText = document.getElementById('importCardsText');
 const editCollectionModal = document.getElementById('editCollectionModal');
 const editCollectionNameInput = document.getElementById('editCollectionName');
 const editCollectionDescriptionInput = document.getElementById('editCollectionDescription');
+const loadCollectionModal = document.getElementById('loadCollectionModal');
+const loadFromGoogleDriveBtn = document.getElementById('loadFromGoogleDriveBtn');
+const uploadFromDeviceBtn = document.getElementById('uploadFromDeviceBtn');
 
 // Set Default Sorting Order to Set Number, Ascending
 let currentSort = { criterion: 'collector_number', direction: 'asc' };
@@ -258,6 +261,83 @@ function closeReferencesModal() {
         referencesModal.style.display = 'none';
     }, 300);
 }
+
+function openLoadCollectionModal(event) {
+    loadCollectionModal.classList.add('active');
+    
+    // Position the modal below the Load Collection button
+    const button = event.target;
+    const rect = button.getBoundingClientRect();
+    const modalContent = loadCollectionModal.querySelector('.context-modal-content');
+    modalContent.style.position = 'absolute';
+    modalContent.style.top = `${rect.bottom + window.scrollY}px`;
+    modalContent.style.left = `${rect.left + window.scrollX}px`;
+}
+
+function closeLoadCollectionModal() {
+    loadCollectionModal.classList.remove('active');
+}
+
+loadCollectionModal.addEventListener('click', (event) => {
+    if (event.target === loadCollectionModal) {
+        closeLoadCollectionModal();
+    }
+});
+
+loadFromGoogleDriveBtn.addEventListener('click', () => {
+    showFeedback('Loading from Google Drive... (Coming soon!)', 'info');
+    closeLoadCollectionModal();
+});
+
+uploadFromDeviceBtn.addEventListener('click', () => {
+    fileInput.accept = '.json';
+    fileInput.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 10 * 1024 * 1024) {
+            showFeedback('File is too large (max 10MB).', 'error');
+            return;
+        }
+        if (!file.name.endsWith('.json')) {
+            showFeedback('Please select a .json file.', 'error');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const text = e.target.result.replace(/^\uFEFF/, '');
+                const data = JSON.parse(text);
+                if (!data.name || !Array.isArray(data.cards)) {
+                    throw new Error('Invalid collection structure');
+                }
+                currentCollection = {
+                    name: data.name || 'Unnamed Collection',
+                    description: data.description || '',
+                    cards: data.cards.map(c => ({
+                        card: { name: c.name, id: c.id || '' },
+                        quantity: c.quantity || 1,
+                        treatment: c.treatment || 'non-foil'
+                    }))
+                };
+                currentFilters = { colors: [], manaCosts: [], rarities: [] };
+                searchCollectionList.value = '';
+                updateCollectionList();
+            } catch (error) {
+                console.error('Load collection error:', error);
+                showFeedback(error.message === 'Invalid collection structure' ? 'Invalid collection structure. Please check the file.' : 'Failed to load collection. Invalid JSON format.', 'error');
+            }
+            fileInput.value = '';
+        };
+        reader.onerror = () => {
+            console.error('FileReader error:', reader.error);
+            showFeedback('Failed to read file. Please try again.', 'error');
+            fileInput.value = '';
+        };
+        reader.readAsText(file);
+    };
+    fileInput.click();
+    closeLoadCollectionModal();
+});
 
 // Open the Edit Collection Modal and pre-populate fields
 function openEditCollectionModal() {
@@ -1030,54 +1110,9 @@ function saveCollection() {
 }
 
 // Load collection
-function loadCollection() {
+function loadCollection(event) {
     if (currentCollection.name !== '' && !confirm('This will overwrite the current collection. Continue?')) return;
-    fileInput.accept = '.json';
-    fileInput.onchange = e => {
-        const file = e.target.files[0];
-        if (!file) return;
-        if (file.size > 10 * 1024 * 1024) {
-            showFeedback('File is too large (max 10MB).', 'error');
-            return;
-        }
-        if (!file.name.endsWith('.json')) {
-            showFeedback('Please select a .json file.', 'error');
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const text = e.target.result.replace(/^\uFEFF/, '');
-                const data = JSON.parse(text);
-                if (!data.name || !Array.isArray(data.cards)) {
-                    throw new Error('Invalid collection structure');
-                }
-                currentCollection = {
-                    name: data.name || 'Unnamed Collection',
-                    description: data.description || '',
-                    cards: data.cards.map(c => ({
-                        card: { name: c.name, id: c.id || '' },
-                        quantity: c.quantity || 1,
-                        treatment: c.treatment || 'non-foil'
-                    }))
-                };
-                currentFilters = { colors: [], manaCosts: [], rarities: [] };
-                searchCollectionList.value = '';
-                updateCollectionList();
-            } catch (error) {
-                console.error('Load collection error:', error);
-                showFeedback(error.message === 'Invalid collection structure' ? 'Invalid collection structure. Please check the file.' : 'Failed to load collection. Invalid JSON format.', 'error');
-            }
-            fileInput.value = '';
-        };
-        reader.onerror = () => {
-            console.error('FileReader error:', reader.error);
-            showFeedback('Failed to read file. Please try again.', 'error');
-            fileInput.value = '';
-        };
-        reader.readAsText(file);
-    };
-    fileInput.click();
+    openLoadCollectionModal(event);
 }
 
 // Unload collection
