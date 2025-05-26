@@ -108,10 +108,11 @@ function loadFileFromDrive(fileId) {
         fileId: fileId,
         alt: 'media',
     }).then(fileResponse => {
-        console.log('File content:', fileResponse.body);
+        console.log('Raw file response:', fileResponse.body); // Log raw content
         let data;
         try {
             data = JSON.parse(fileResponse.body);
+            console.log('Parsed data:', data); // Log parsed data
         } catch (error) {
             console.error('JSON parse error:', error);
             showFeedback('Failed to parse file from Google Drive: Invalid JSON format.', 'error');
