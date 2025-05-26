@@ -36,6 +36,8 @@ const loadCollectionModal = document.getElementById('loadCollectionModal');
 const loadFromGoogleDriveBtn = document.getElementById('loadFromGoogleDriveBtn');
 const uploadFromDeviceBtn = document.getElementById('uploadFromDeviceBtn');
 
+// This is a new comment
+
 // Google Drive API configuration
 const CLIENT_ID = '1082824817658-ana0620kbg7rqa7krvn7nk06qat39k0e.apps.googleusercontent.com'; // Replace with your OAuth 2.0 Client ID from Google Cloud
 const API_KEY = 'AIzaSyAx6RffiV7cGc-IQlkA2rpEpaOBjUYqxrs'; // Replace with your API Key from Google Cloud
