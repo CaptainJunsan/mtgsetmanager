@@ -36,48 +36,37 @@ const loadCollectionModal = document.getElementById('loadCollectionModal');
 const loadFromGoogleDriveBtn = document.getElementById('loadFromGoogleDriveBtn');
 const uploadFromDeviceBtn = document.getElementById('uploadFromDeviceBtn');
 const createDeckModal = document.getElementById('createDeckModal');
-
-// This is a new comment
+const deckControlPanel = document.getElementById('deckControlPanel');
 
 // Google Drive API configuration
 const CLIENT_ID = '1082824817658-ana0620kbg7rqa7krvn7nk06qat39k0e.apps.googleusercontent.com'; // Replace with your OAuth 2.0 Client ID from Google Cloud
-const API_KEY = 'AIzaSyAx6RffiV7cGc-IQlkA2rpEpaOBjUYqxrs'; // Replace with your API Key from Google Cloud
-const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'];
-const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
+const API_KEY = 'AIzaSyCGRNW_GIZA_jLVZ4CNs4iebNpPo4Xnv1E'; // Replace with your API Key from Google Cloud
+// const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'];
+const SCOPES = 'https://www.googleapis.com/auth/drive';
 
 let tokenClient;
 let accessToken = null;
+let pickerInited = false;
+let gisInited = false;
 
-// function initializeGapiClient(retryCount = 0) {
-//     gapi.load('client:picker', () => { // Load both client and picker
-//         gapi.client.init({
-//             apiKey: API_KEY,
-//             discoveryDocs: DISCOVERY_DOCS,
-//         }).then(() => {
-//             tokenClient = google.accounts.oauth2.initTokenClient({
-//                 client_id: CLIENT_ID,
-//                 scope: SCOPES,
-//                 callback: (response) => {
-//                     if (response.error) {
-//                         showFeedback('Google Drive authentication failed: ' + response.error, 'error');
-//                         console.error('Auth error:', response.error);
-//                         return;
-//                     }
-//                     accessToken = response.access_token;
-//                     console.log('Access token obtained:', accessToken);
-//                     loadFileFromGoogleDrive();
-//                 },
-//             });
-//         }).catch(error => {
-//             console.error('Error initializing gapi client:', error);
-//             if (retryCount < 3) {
-//                 setTimeout(() => initializeGapiClient(retryCount + 1), 2000 * (retryCount + 1));
-//             } else {
-//                 showFeedback('Failed to initialize Google Drive client after multiple attempts.', 'error');
-//             }
-//         });
-//     });
-// }
+// Use the API Loader script to load google.picker
+function onApiLoad() {
+    gapi.load('picker', onPickerApiLoad);
+}
+
+function onPickerApiLoad() {
+    pickerInited = true;
+}
+
+function gisLoaded() {
+    // TODO(developer): Replace with your client ID and required scopes.
+    tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: '1082824817658-ana0620kbg7rqa7krvn7nk06qat39k0e.apps.googleusercontent.com',
+        scope: 'https://www.googleapis.com/auth/drive',
+        callback: '', // defined later
+    });
+    gisInited = true;
+}
 
 function createPicker() {
     if (!accessToken) {
@@ -240,12 +229,12 @@ function showFeedback(message, type = 'info', persist = false) {
         loading: [message] // Loading messages don't vary
     };
     const selectedMessage = type === 'loading' ? message : messages[type][Math.floor(Math.random() * messages[type].length)];
-    
+
     // Split the message into main and secondary parts after punctuation and whitespace
     const parts = selectedMessage.split(/([.!?])\s+/); // Split after punctuation AND whitespace
     let mainMessage = parts[0]; // Text before punctuation
     let secondaryMessage = '';
-    
+
     // If there's punctuation, include it in the main message
     if (parts.length > 1) {
         mainMessage += parts[1]; // Add the punctuation to the main message
@@ -260,7 +249,7 @@ function showFeedback(message, type = 'info', persist = false) {
         ${secondaryMessage ? `<div class="secondary-message">${secondaryMessage}</div>` : ''}
         <span class="close-feedback" onclick="this.parentElement.remove()">×</span>
     `;
-    
+
     const feedbackContainer = document.getElementById('feedbackContainer') || document.createElement('div');
     if (!feedbackContainer.id) {
         feedbackContainer.id = 'feedbackContainer';
@@ -300,6 +289,7 @@ function updateUIState() {
     searchCollectionList.style.display = isCollectionActive && hasCards ? 'block' : 'none';
     filterControls.style.display = isCollectionActive && hasCards ? 'flex' : 'none';
     displayCount.style.display = isCollectionActive && hasCards ? 'block' : 'none';
+    deckControlPanel.style.display = isCollectionActive && hasCards ? 'flex' : 'none';
 
     const sortControls = document.querySelector('.sort-controls');
     if (sortControls) {
@@ -376,7 +366,7 @@ function closeReferencesModal() {
 
 function openLoadCollectionModal(event) {
     loadCollectionModal.classList.add('active');
-    
+
     // Position the modal below the Load Collection button
     const button = event.target;
     const rect = button.getBoundingClientRect();
@@ -428,7 +418,7 @@ uploadFromDeviceBtn.addEventListener('click', () => {
             return;
         }
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             try {
                 const text = e.target.result.replace(/^\uFEFF/, '');
                 const data = JSON.parse(text);
@@ -624,9 +614,9 @@ function openCardDetailsModal(card, treatment, fromSearch = false) {
                 <p class="type-line">${card.type_line || 'Unknown'}</p>
                 ${card.power && card.toughness ? `<p>${card.power}/${card.toughness}</p>` : ''}
                 <p class="mana-text">${replaceManaSymbols(card.oracle_text || '')}</p>
-                ${fromSearch && isCollectionActive ? 
-                    `<button class="button primary-button medium-button" onclick="addToCollection('${card.id}')">Add to Collection</button>` :
-                    fromSearch ? '' :
+                ${fromSearch && isCollectionActive ?
+                `<button class="button primary-button medium-button" onclick="addToCollection('${card.id}')">Add to Collection</button>` :
+                fromSearch ? '' :
                     isCollectionActive ? `
                         <div>
                             <label for="removeQty-${card.id}">Remove: </label>
@@ -898,7 +888,7 @@ function applySort() {
     currentSort.criterion = sortCriterionSelect.value;
     currentSort.direction = sortDirectionSelect.value;
     console.log(`Applying sort: criterion=${currentSort.criterion}, direction=${currentSort.direction}`);
-    
+
     // Sort the current collection and reapply filters
     sortCards(currentSort.criterion, currentSort.direction);
     updateCollectionList(); // This will render the sorted list and reapply filters
@@ -1325,7 +1315,7 @@ function uploadImportFile() {
             return;
         }
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             const text = e.target.result.replace(/^\uFEFF/, '');
             importCardsText.value = text; // Populate the textarea with the file content
             fileInput.value = ''; // Clear the file input
