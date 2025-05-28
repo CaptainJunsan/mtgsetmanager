@@ -51,14 +51,17 @@ let gisInited = false;
 
 // Use the API Loader script to load google.picker
 function onApiLoad() {
+    console.log('Loading Google Picker API...');
     gapi.load('picker', onPickerApiLoad);
 }
 
 function onPickerApiLoad() {
+    console.log('Google Picker API loaded');
     pickerInited = true;
 }
 
 function gisLoaded() {
+    console.log('Google Identity Services loaded');
     // TODO(developer): Replace with your client ID and required scopes.
     tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: '1082824817658-ana0620kbg7rqa7krvn7nk06qat39k0e.apps.googleusercontent.com',
@@ -69,6 +72,7 @@ function gisLoaded() {
 }
 
 function createPicker() {
+    console.log('Creating Google Picker...');
     if (!accessToken) {
         showFeedback('Not authenticated. Please try again.', 'error');
         return;
@@ -91,9 +95,11 @@ function createPicker() {
         })
         .build();
     picker.setVisible(true);
+    console.log('Google Picker created and visible');
 }
 
 function loadFileFromDrive(fileId) {
+    console.log('Loading file from Google Drive with ID:', fileId);
     gapi.client.drive.files.get({
         fileId: fileId,
         alt: 'media',
@@ -134,6 +140,7 @@ function loadFileFromDrive(fileId) {
         console.error('Error loading file from Google Drive:', error);
         showFeedback('Failed to load file from Google Drive: Invalid format or network issue.', 'error');
     });
+    console.log('File loading initiated from Google Drive with ID:', fileId);
 }
 
 // Set Default Sorting Order to Set Number, Ascending
