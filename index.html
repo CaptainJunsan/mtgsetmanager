@@ -17,8 +17,8 @@
             <h5>Mr. Bojangles' Collection Manager</h5>
         </div>
         <div id="quickLookupContainer">
-            <button id="quickCardSearchButton" class="button secondary-button medium-button">Quick Card
-                Search...</button>
+            <button id="quickCardSearchButton" class="text-input">Search all
+                cards...</button>
         </div>
         <div id="menuBar">
             <button id="createNewCollectionButton" class="button primary-button medium-button">Create New
@@ -29,8 +29,8 @@
     <div id="pageContent">
         <div id="emptyPage" class="display-container full-width has-shadow">
             <h3>Welcome to your Collection Manager</h3>
-            <p><a onclick="createNewCollection()">Create a new collection</a> or <a onclick="loadCollection(event)">load
-                    an existing one</a> to start managing your Magic: The Gathering collection.</p>
+            <p>Create a new collection or load an existing one to start managing your Magic: The Gathering collection.
+            </p>
         </div>
         <div id="createCollectionForm" class="display-container third-width has-shadow" style="display: none;">
             <h3 class="title">Create New Collection</h3>
@@ -64,6 +64,19 @@
                     MTG Arena...</button>
                 <button class="button secondary-button medium-button" onclick="unloadCollection()">Unload
                     Collection</button>
+            </div>
+        </div>
+        <div id="deckControlPanel" class="display-container full-width" style="display: none;">
+            <h3 id="deckControlTitle">Deck Control Panel</h3>
+            <div class="button-group">
+                <button class="button primary-button medium-button" onclick="openCreateDeckModal()">Create Deck</button>
+                <button id="addCardsToDeckBtn" class="button primary-button medium-button"
+                    onclick="openAddCardModalWithDestination()">Add Cards</button>
+                <select id="deckSelect" class="text-input length-medium" disabled>
+                    <option value="">Select deck...</option>
+                </select>
+                <button id="closeDeckBtn" class="button secondary-button medium-button" disabled>Close Deck</button>
+                <button id="deleteDeckBtn" class="button secondary-button medium-button" disabled>Delete Deck</button>
             </div>
         </div>
         <div id="collectionList" class="display-container full-width has-shadow" style="display: none;">
@@ -155,6 +168,39 @@
             </div>
         </div>
     </div>
+    <div id="createDeckModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeCreateDeckModal()">&times;</span>
+            <h3>Create deck</h3>
+            <input type="text" id="deckName" class="text-input" placeholder="Deck Name" required>
+            <label for="deckFormat">Select Format</label>
+            <select id="deckFormat" class="text-input">
+                <option value="Standard">Standard</option>
+                <option value="Commander">Commander</option>
+                <option value="Modern">Modern</option>
+                <option value="Pauper">Pauper</option>
+                <option value="Non-Format">Non-Format</option>
+            </select>
+            <div class="button-group">
+                <button class="button secondary-button medium-button" onclick="closeCreateDeckModal()">Cancel</button>
+                <button class="button primary-button medium-button" onclick="createDeck()">Create deck</button>
+            </div>
+        </div>
+    </div>
+    <div id="addToDeckModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeAddToDeckModal()">×</span>
+            <h3>Add cards from your collection to your deck</h3>
+            <input type="text" id="deckSearchInput" class="text-input length-max"
+                placeholder="Search your collection...">
+            <p id="deckCardCount">0/0 cards in Deck</p>
+            <div id="collectionForDeckList" class="card-gallery"></div>
+            <div class="button-group">
+                <button class="button secondary-button medium-button" onclick="closeAddToDeckModal()">Cancel</button>
+                <button class="button primary-button medium-button" onclick="closeAddToDeckModal()">Done</button>
+            </div>
+        </div>
+    </div>
     <div id="addCardModal" class="modal">
         <div class="modal-content">
             <span class="svg-close-button" onclick="closeAddCardModal()">
@@ -163,7 +209,10 @@
                 </svg>
             </span>
             <h2 id="addCardModalTitle">Add Card</h2>
-            <input type="text" id="searchInput" class="text-input" placeholder="Search by name..." maxlength="100">
+            <div class="text-with-close-x"><input type="text" id="searchInput" class="text-input"
+                    placeholder="Search for a card..." maxlength="100">
+                <span id="clearSearchBtn" class="clear-search" onclick="clearSearchInput()">×</span>
+            </div>
             <div id="searchResults"></div>
         </div>
     </div>
@@ -206,20 +255,12 @@
         </div>
     </div>
     <footer>
-        <p>Collection Manager v1.2.9 © Mr. Bojangles & Grok 2025 | <a onclick="openReferencesModal()">References</a></p>
+        <p>Collection Manager v1.3.0 © Mr. Bojangles 2025 | <a onclick="openReferencesModal()">References</a></p>
     </footer>
     <input type="file" id="fileInput" style="display: none;">
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client"></script>
-    <script>
-        // Load Picker API after gapi is loaded
-        function loadPicker() {
-            gapi.load('picker', () => {
-                console.log('Google Picker API loaded');
-            });
-        }
-    </script>
     <script src="script.js"></script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="onApiLoad()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
 
 </html>
