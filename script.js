@@ -37,6 +37,10 @@ const loadFromGoogleDriveBtn = document.getElementById('loadFromGoogleDriveBtn')
 const uploadFromDeviceBtn = document.getElementById('uploadFromDeviceBtn');
 const createDeckModal = document.getElementById('createDeckModal');
 const deckControlPanel = document.getElementById('deckControlPanel');
+const addToDeckModal = document.getElementById('addToDeckModal');
+const deckSearchInput = document.getElementById('deckSearchInput');
+const collectionForDeckList = document.getElementById('collectionForDeckList');
+const deckCardCount = document.getElementById('deckCardCount');
 
 // Google Drive API configuration
 const CLIENT_ID = '1082824817658-ana0620kbg7rqa7krvn7nk06qat39k0e.apps.googleusercontent.com';
@@ -348,13 +352,14 @@ function updateFilterButtonText() {
 }
 
 // Modal handlers
-document.addEventListener('click', (e) => {
-    if (e.target === cardDetailsModal) closeCardDetailsModal();
-    else if (e.target === addCardModal) closeAddCardModal();
-    else if (e.target === referencesModal) closeReferencesModal();
-    else if (e.target === editCollectionModal) closeEditCollectionModal();
-    else if (e.target === createDeckModal) closeCreateDeckModal();
-});
+// document.addEventListener('click', (e) => {
+//     if (e.target.classList.contains('modal') && !e.target.classList.contains('context-modal')) {
+//         e.target.classList.remove('active');
+//         setTimeout(() => {
+//             e.target.style.display = 'none';
+//         }, 300);
+//     }
+// });
 
 // References modal handlers
 function openReferencesModal() {
@@ -689,11 +694,113 @@ function openAddCardModal() {
     searchCardsDebounced();
 }
 
+function openAddCardModalWithDestination() {
+    if (currentView !== 'collection') {
+        openAddToDeckModal();
+    } else {
+        openAddCardModal();
+    }
+}
+
+function openAddToDeckModal() {
+    if (currentView === 'collection') {
+        showFeedback('Please select a deck first.', 'error');
+        return;
+    }
+    console.log('Opening Add to Deck modal');
+    addToDeckModal.style.display = 'flex';
+    addToDeckModal.classList.add('active');
+    deckSearchInput.value = '';
+    deckSearchInput.focus();
+    // Store temporary deck cards for this session
+    const deck = currentCollection.decks[currentView];
+    deck.tempCards = deck.tempCards || deck.cards.map(c => ({ ...c }));
+    displayCollectionForDeck();
+}
+
+function closeAddToDeckModal() {
+    addToDeckModal.classList.remove('active');
+    setTimeout(() => {
+        addToDeckModal.style.display = 'none';
+    }, 300);
+    const deck = currentCollection.decks[currentView];
+    deck.cards = deck.tempCards || deck.cards;
+    delete deck.tempCards;
+    updateCollectionList();
+}
+
+function displayCollectionForDeck() {
+    const query = deckSearchInput.value.trim().toLowerCase();
+    collectionForDeckList.innerHTML = '';
+    const deck = currentCollection.decks[currentView];
+    const totalDeckCards = deck.tempCards.reduce((sum, c) => sum + c.quantity, 0);
+
+    const filteredCards = currentCollection.cards.filter(({ card }) => {
+        return !query || card.name.toLowerCase().includes(query) || card.type_line.toLowerCase().includes(query);
+    });
+
+    filteredCards.forEach(({ card, quantity, treatment }) => {
+        const deckCard = deck.tempCards.find(c => c.cardId === card.id && c.treatment === treatment);
+        const deckQuantity = deckCard ? deckCard.quantity : 0;
+        const availableQuantity = quantity - deckQuantity;
+        if (availableQuantity <= 0) return;
+
+        const div = document.createElement('div');
+        div.className = 'card-entry';
+        const imageUrl = card.image_uris?.normal || '';
+        div.innerHTML = `
+            ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" class="${treatment === 'foil' ? 'foil' : ''}">` : '<p>No image available</p>'}
+            <table class="card-table">
+                <tr>
+                    <td class="quantity-cell">${availableQuantity}</td>
+                    <td>${card.name}</td>
+                    <td title="${card.rarity.charAt(0).toUpperCase() + card.rarity.slice(1)}" class="rarity-symbol ${card.rarity.toLowerCase()} table-rarity-symbol">${rarityMap[card.rarity.toLowerCase()] || card.rarity.charAt(0).toUpperCase() + card.rarity.slice(1)}</td>
+                    <td title="${treatment.charAt(0).toUpperCase() + treatment.slice(1)}">${treatment === 'foil' ? '<span class="foil-star">★</span>' : '<span class="non-foil-dot">•</span>'}</td>
+                </tr>
+            </table>
+        `;
+        div.addEventListener('click', () => addCardToDeckFromCollection(card.id, treatment, div));
+        collectionForDeckList.appendChild(div);
+    });
+
+    deckCardCount.innerText = `${totalDeckCards}/${deck.tempCards.length} cards in Deck`;
+}
+
+function addCardToDeckFromCollection(cardId, treatment, element) {
+    const deck = currentCollection.decks[currentView];
+    const collectionCard = currentCollection.cards.find(c => c.card.id === cardId && c.treatment === treatment);
+    if (!collectionCard) return;
+
+    const deckCard = deck.tempCards.find(c => c.cardId === cardId && c.treatment === treatment);
+    const availableQuantity = collectionCard.quantity - (deckCard ? deckCard.quantity : 0);
+    if (availableQuantity <= 0) {
+        showFeedback(`No more copies of ${collectionCard.card.name} available.`, 'error');
+        return;
+    }
+
+    if (deckCard) {
+        deckCard.quantity += 1;
+    } else {
+        deck.tempCards.push({ cardId, quantity: 1, treatment });
+    }
+
+    element.classList.add('selected');
+    showFeedback(`1 × ${collectionCard.card.name} (${treatment}) added to deck!`, 'success');
+    displayCollectionForDeck();
+}
+
 function closeAddCardModal() {
     addCardModal.classList.remove('active');
     setTimeout(() => {
         addCardModal.style.display = 'none';
     }, 300);
+}
+
+function clearSearchInput() {
+    searchInput.value = '';
+    searchResults.innerHTML = '';
+    document.getElementById('clearSearchBtn').style.display = 'none';
+    searchInput.focus();
 }
 
 function clearSearchResults() {
@@ -711,7 +818,8 @@ function openCardDetailsModal(card, treatment, fromSearch = false) {
         modalContent.className = 'modal-content';
         const imageUrl = card.image_uris?.normal || '';
         const isCollectionActive = currentCollection.name !== '';
-        const cardCount = currentCollection.cards.filter(c => c.card.id === card.id && c.treatment === treatment).reduce((sum, c) => sum + c.quantity, 0);
+        const cardCount = isCollectionActive ? currentCollection.cards.filter(c => c.card.id === card.id && c.treatment === treatment).reduce((sum, c) => sum + c.quantity, 0) : 0;
+        const hasDecks = currentCollection.decks && currentCollection.decks.length > 0;
         modalContent.innerHTML = `
             <span class="svg-close-button" onclick="closeCardDetailsModal()">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -729,11 +837,17 @@ function openCardDetailsModal(card, treatment, fromSearch = false) {
                 `<button class="button primary-button medium-button" onclick="addToCollection('${card.id}')">Add to Collection</button>` :
                 fromSearch ? '' :
                     isCollectionActive ? `
-                        <div>
-                            <label for="removeQty-${card.id}">Remove: </label>
-                            <input type="number" id="removeQty-${card.id}" class="text-input quantity" min="1" max="${cardCount}" value="1" style="width: 50px; margin-right: 10px;">
-                            <button class="button secondary-button medium-button" onclick="removeFromCollection('${card.id}', '${treatment}')">Remove from Collection</button>
-                        </div>` : ''}
+                    <div>
+                        <label for="removeQty-${card.id}">Remove: </label>
+                        <input type="number" id="removeQty-${card.id}" class="text-input quantity" min="1" max="${cardCount}" value="1" style="width: 50px; margin-right: 10px;">
+                        ${hasDecks ? `
+                            <select id="source-${card.id}" class="text-input-dropdown" style="width: 150px; margin-right: 10px;">
+                                <option value="collection">Collection</option>
+                                ${currentCollection.decks.map((deck, index) => `<option value="${index}">${deck.name}</option>`).join('')}
+                            </select>
+                        ` : ''}
+                        <button class="button secondary-button medium-button" onclick="removeFromCollection('${card.id}', '${treatment}', document.getElementById('source-${card.id}')?.value || 'collection')">Remove</button>
+                    </div>` : ''}
             </div>
         `;
         cardDetailsModal.appendChild(modalContent);
@@ -800,7 +914,10 @@ const searchCardsDebounced = debounce(async () => {
     }
 }, 300);
 
-searchInput.addEventListener('input', searchCardsDebounced);
+searchInput.addEventListener('input', (e) => {
+    searchCardsDebounced();
+    document.getElementById('clearSearchBtn').style.display = e.target.value.trim() ? 'block' : 'none';
+});
 
 // Render search results
 function displaySearchResults(cards) {
@@ -811,6 +928,7 @@ function displaySearchResults(cards) {
     }
     const isCollectionActive = currentCollection.name !== '';
     const hasDecks = currentCollection.decks && currentCollection.decks.length > 0;
+    const defaultDestination = currentView === 'collection' ? '' : currentView.toString();
     cards.forEach(card => {
         const div = document.createElement('div');
         div.className = 'search-result';
@@ -825,19 +943,20 @@ function displaySearchResults(cards) {
                 ${isCollectionActive ? `
                     <div class="inputs">
                         <input type="number" class="text-input quantity" min="1" max="4" value="1" id="qty-${card.id}">
-                        <select class="text-input" id="treatment-${card.id}" onchange="updateSearchResultFoil(this, '${card.id}')">
+                        <select class="text-input-dropdown" id="treatment-${card.id}" onchange="updateSearchResultFoil(this, '${card.id}')">
                             <option value="non-foil">Non-foil</option>
                             <option value="foil">Foil</option>
                         </select>
                         ${hasDecks ? `
-                            <select class="text-input" id="deck-${card.id}">
-                                <option value="">Add to Collection</option>
+                            <select class="text-input-dropdown" id="deck-${card.id}">
+                                <option value="">Select Destination</option>
+                                <option value="collection">Collection</option>
                                 ${currentCollection.decks.map((deck, index) => `<option value="${index}">${deck.name}</option>`).join('')}
                             </select>
                         ` : ''}
                         <div class="add-button-container">
                             <button class="button primary-button medium-button" onclick="addToCollectionOrDeck('${card.id}')">Add</button>
-                            ${showCountText ? `<span class="card-collection-count">★ ${foilCount} | 🞄 ${nonFoilCount}</span>` : ''}
+                            ${showCountText ? `<span class="card-collection-count">★ ${foilCount} | ${nonFoilCount}</span>` : ''}
                         </div>
                     </div>
                 ` : ''}
@@ -845,6 +964,10 @@ function displaySearchResults(cards) {
             ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" id="img-${card.id}" style="cursor: pointer;">` : '<p>No image available</p>'}
         `;
         searchResults.appendChild(div);
+        if (isCollectionActive && hasDecks) {
+            const deckSelect = div.querySelector(`#deck-${card.id}`);
+            deckSelect.value = defaultDestination;
+        }
         const img = div.querySelector(`#img-${card.id}`);
         if (img) {
             img.addEventListener('click', () => {
@@ -862,7 +985,7 @@ async function addToCollectionOrDeck(cardId) {
     const deckSelect = document.getElementById(`deck-${cardId}`);
     const quantity = parseInt(quantityInput.value) || 1;
     const treatment = treatmentSelect.value || 'non-foil';
-    const deckIndex = deckSelect ? deckSelect.value : '';
+    const destination = deckSelect ? deckSelect.value : 'collection';
 
     if (quantity < 1 || quantity > 4) {
         showFeedback('Quantity must be between 1 and 4.', 'error');
@@ -877,7 +1000,7 @@ async function addToCollectionOrDeck(cardId) {
         cardCache[cardId] = fullCard;
     }
 
-    if (deckIndex === '') {
+    if (destination === 'collection' || destination === '') {
         const existingCard = currentCollection.cards.find(c => c.card.id === cardId && c.treatment === treatment);
         if (existingCard) {
             existingCard.quantity += quantity;
@@ -886,33 +1009,37 @@ async function addToCollectionOrDeck(cardId) {
         }
         showFeedback(`${quantity} × ${fullCard.name} (${treatment}) added to collection!`, 'success');
     } else {
-        const deck = currentCollection.decks[parseInt(deckIndex)];
-        const collectionCard = currentCollection.cards.find(c => c.card.id === cardId && c.treatment === treatment);
+        const deckIndex = parseInt(destination);
+        const deck = currentCollection.decks[deckIndex];
+        let collectionCard = currentCollection.cards.find(c => c.card.id === cardId && c.treatment === treatment);
+
+        // Add to collection if not present
         if (!collectionCard) {
             currentCollection.cards.push({ card: fullCard, quantity, treatment });
-            deck.cards.push({ cardId, quantity, treatment });
-            showFeedback(`${quantity} × ${fullCard.name} (${treatment}) added to collection and deck "${deck.name}"!`, 'success');
+            collectionCard = currentCollection.cards.find(c => c.card.id === cardId && c.treatment === treatment);
         } else {
+            // Ensure enough cards in collection
             const availableQuantity = collectionCard.quantity;
             const deckCard = deck.cards.find(c => c.cardId === cardId && c.treatment === treatment);
             const currentDeckQuantity = deckCard ? deckCard.quantity : 0;
             if (currentDeckQuantity + quantity > availableQuantity) {
-                showFeedback(`Cannot add ${quantity} copies. Only ${availableQuantity - currentDeckQuantity} available in collection.`, 'error');
+                showFeedback(`Cannot add ${quantity} copies to deck. Only ${availableQuantity - currentDeckQuantity} available in collection.`, 'error');
                 return;
             }
-            if (deckCard) {
-                deckCard.quantity += quantity;
-            } else {
-                deck.cards.push({ cardId, quantity, treatment });
-            }
-            showFeedback(`${quantity} × ${fullCard.name} (${treatment}) added to deck "${deck.name}"!`, 'success');
         }
+
+        // Add to deck
+        const deckCard = deck.cards.find(c => c.cardId === cardId && c.treatment === treatment);
+        if (deckCard) {
+            deckCard.quantity += quantity;
+        } else {
+            deck.cards.push({ cardId, quantity, treatment });
+        }
+        showFeedback(`${quantity} × ${fullCard.name} (${treatment}) added to deck "${deck.name}"!`, 'success');
     }
 
     updateCollectionList();
-    searchInput.value = '';
     searchInput.focus();
-    searchCardsDebounced();
 }
 
 // Update foil class for search result image
@@ -1073,26 +1200,37 @@ async function addToCollection(cardId) {
 }
 
 // Remove card
-function removeFromCollection(cardId, treatment) {
-    console.log('Removing card:', { cardId, treatment });
+function removeFromCollection(cardId, treatment, source = 'collection') {
+    console.log('Removing card:', { cardId, treatment, source });
     const removeQtyInput = document.getElementById(`removeQty-${cardId}`);
     const removeQty = parseInt(removeQtyInput ? removeQtyInput.value : 1) || 1;
-    const cardCount = currentCollection.cards.filter(c => c.card.id === cardId && c.treatment === treatment).reduce((sum, c) => sum + c.quantity, 0);
 
-    if (removeQty < 1 || removeQty > cardCount) {
+    let targetCards, cardEntry, cardCount;
+    if (source === 'collection') {
+        cardEntry = currentCollection.cards.find(c => c.card.id === cardId && c.treatment === treatment);
+        cardCount = currentCollection.cards.filter(c => c.card.id === cardId && c.treatment === treatment).reduce((sum, c) => sum + c.quantity, 0);
+        targetCards = currentCollection.cards;
+    } else {
+        const deckIndex = parseInt(source);
+        const deck = currentCollection.decks[deckIndex];
+        cardEntry = deck.cards.find(c => c.cardId === cardId && c.treatment === treatment);
+        cardCount = deck.cards.filter(c => c.cardId === cardId && c.treatment === treatment).reduce((sum, c) => sum + c.quantity, 0);
+        targetCards = deck.cards;
+    }
+
+    if (removeQty < 0 || removeQty > cardCount) {
         showFeedback(`Quantity to remove must be between 1 and ${cardCount}.`, 'error');
         return;
     }
 
-    const cardEntry = currentCollection.cards.find(c => c.card.id === cardId && c.treatment === treatment);
     if (!cardEntry) {
-        console.error('Card not found:', { cardId, treatment });
-        showFeedback('Card not found in collection.', 'error');
+        console.error('Card not found:', { cardId, treatment, source });
+        showFeedback('Card not found in source.', 'error');
         closeCardDetailsModal();
         return;
     }
 
-    const cardElement = collectionCardsList.querySelector(`[data-card-name="${cardEntry.card.name.replace(/"/g, '\\"')}"]`);
+    const cardElement = collectionCardsList.querySelector(`[data-card-name="${cardEntry.card ? cardEntry.card.name.replace(/"/g, '\\"') : cardEntry.name.replace(/"/g, '\\"')}"]`);
     if (cardElement) {
         cardElement.classList.add('removed');
         const particleDiv = document.createElement('div');
@@ -1104,21 +1242,29 @@ function removeFromCollection(cardId, treatment) {
     }
 
     if (cardEntry.quantity <= removeQty) {
-        currentCollection.cards = currentCollection.cards.filter(c => !(c.card.id === cardId && c.treatment === treatment));
+        if (source === 'collection') {
+            currentCollection.cards = currentCollection.cards.filter(c => !(c.card.id === cardId && c.treatment === treatment));
+            // Remove from all decks
+            currentCollection.decks.forEach(deck => {
+                deck.cards = deck.cards.filter(c => !(c.cardId === cardId && c.treatment === treatment));
+            });
+        } else {
+            targetCards = targetCards.filter(c => !(c.cardId === cardId && c.treatment === treatment));
+        }
     } else {
         cardEntry.quantity -= removeQty;
     }
 
-    console.log('Current collection after remove:', JSON.parse(JSON.stringify(currentCollection.cards)));
+    console.log('Current collection after remove:', JSON.parse(JSON.stringify(currentCollection)));
     updateCollectionList();
     closeCardDetailsModal();
-    showFeedback(`${removeQty} ${cardEntry.card.name} (${treatment}) removed from collection!`, 'success');
+    showFeedback(`${removeQty} × ${cardEntry.card ? cardEntry.card.name : cardEntry.name} (${treatment}) removed from ${source === 'collection' ? 'collection' : currentCollection.decks[source].name}!`, 'success');
 }
 
 // Sorting
 function sortCards(cards, criterion, direction = 'asc') {
     console.log('Sorting cards with criterion:', criterion, 'direction:', direction);
-   cards.sort((a, b) => {
+    cards.sort((a, b) => {
         let valueA, valueB, secondaryA, secondaryB, tertiaryA, tertiaryB;
         try {
             switch (criterion) {
@@ -1382,13 +1528,6 @@ function closeImportCardsModal() {
     }, 300);
 }
 
-// Close modal when clicking outside
-importCardsModal.addEventListener('click', (e) => {
-    if (e.target === importCardsModal) {
-        closeImportCardsModal();
-    }
-});
-
 // Function to handle file upload
 function uploadImportFile() {
     fileInput.accept = '.txt';
@@ -1533,4 +1672,5 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('deckSelect').addEventListener('change', (e) => {
         selectDeck(e.target.value);
     });
+    deckSearchInput.addEventListener('input', debounce(displayCollectionForDeck, 300));
 });
