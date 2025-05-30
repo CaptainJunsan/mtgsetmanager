@@ -17,7 +17,8 @@
             <h5>Mr. Bojangles' Collection Manager</h5>
         </div>
         <div id="quickLookupContainer">
-            <button id="quickCardSearchButton" class="button secondary-button medium-button">Search all cards...</button>
+            <button id="quickCardSearchButton" class="button secondary-button medium-button">Search all
+                cards...</button>
         </div>
         <div id="menuBar">
             <button id="createNewCollectionButton" class="button primary-button medium-button">Create New
@@ -70,11 +71,10 @@
             <div class="button-group">
                 <button class="button primary-button medium-button" onclick="openCreateDeckModal()">Create Deck</button>
                 <select id="deckSelect" class="text-input length-medium" disabled>
-                    <option value="select">Select deck...</option>
-                    <option value="none">No decks to show</option>
+                    <option value="">Select deck...</option>
                 </select>
-                <button class="button secondary-button medium-button" onclick="noFun()" disabled>Close Deck</button>
-                <button class="button secondary-button medium-button" onclick="noFun()" disabled>Delete Deck</button>
+                <button id="closeDeckBtn" class="button secondary-button medium-button" disabled>Close Deck</button>
+                <button id="deleteDeckBtn" class="button secondary-button medium-button" disabled>Delete Deck</button>
             </div>
         </div>
         <div id="collectionList" class="display-container full-width has-shadow" style="display: none;">
@@ -168,19 +168,20 @@
     </div>
     <div id="createDeckModal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeCreateDeckModal()">×</span>
+            <span class="close-button" onclick="closeCreateDeckModal()">&times;</span>
             <h3>Create deck</h3>
-            <input type="text" id="createDeckName" class="text-input" placeholder="Deck Name">
-            <select id="createDeckFormat" class="text-input length-medium">
-                <option value="">Select Format</option>
+            <input type="text" id="deckName" class="text-input" placeholder="Deck Name" required>
+            <label for="deckFormat">Select Format</label>
+            <select id="deckFormat" class="text-input">
                 <option value="Standard">Standard</option>
                 <option value="Commander">Commander</option>
                 <option value="Modern">Modern</option>
                 <option value="Pauper">Pauper</option>
+                <option value="Non-Format">Non-Format</option>
             </select>
             <div class="button-group">
-                <button class="secondary-button medium-button" onclick="closeCreateDeckModal()">Cancel</button>
-                <button class="primary-button medium-button" onclick="saveDeckDetails()">Create deck</button>
+                <button class="button secondary-button medium-button" onclick="closeCreateDeckModal()">Cancel</button>
+                <button class="button primary-button medium-button" onclick="createDeck()">Create deck</button>
             </div>
         </div>
     </div>

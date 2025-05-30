@@ -39,9 +39,8 @@ const createDeckModal = document.getElementById('createDeckModal');
 const deckControlPanel = document.getElementById('deckControlPanel');
 
 // Google Drive API configuration
-const CLIENT_ID = '1082824817658-ana0620kbg7rqa7krvn7nk06qat39k0e.apps.googleusercontent.com'; // Replace with your OAuth 2.0 Client ID from Google Cloud
-const API_KEY = 'AIzaSyCGRNW_GIZA_jLVZ4CNs4iebNpPo4Xnv1E'; // Replace with your API Key from Google Cloud
-// const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'];
+const CLIENT_ID = '1082824817658-ana0620kbg7rqa7krvn7nk06qat39k0e.apps.googleusercontent.com';
+const API_KEY = 'AIzaSyCGRNW_GIZA_jLVZ4CNs4iebNpPo4Xnv1E';
 const SCOPES = 'https://www.googleapis.com/auth/drive';
 
 let tokenClient;
@@ -62,11 +61,10 @@ function onPickerApiLoad() {
 
 function gisLoaded() {
     console.log('Google Identity Services loaded');
-    // TODO(developer): Replace with your client ID and required scopes.
     tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: '1082824817658-ana0620kbg7rqa7krvn7nk06qat39k0e.apps.googleusercontent.com',
         scope: 'https://www.googleapis.com/auth/drive',
-        callback: '', // defined later
+        callback: '',
     });
     gisInited = true;
 }
@@ -78,10 +76,10 @@ function createPicker() {
         return;
     }
     const view = new google.picker.View(google.picker.ViewId.DOCS);
-    view.setMimeTypes('application/json'); // Only show .json files
+    view.setMimeTypes('application/json');
     const picker = new google.picker.PickerBuilder()
         .enableFeature(google.picker.Feature.NAV_HIDDEN)
-        .setAppId(CLIENT_ID.split('-')[0]) // Project number from Google Cloud
+        .setAppId(CLIENT_ID.split('-')[0])
         .setOAuthToken(accessToken)
         .addView(view)
         .setCallback(data => {
@@ -98,56 +96,58 @@ function createPicker() {
     console.log('Google Picker created and visible');
 }
 
+async function fetchFullCardData(card) {
+    if (!cardCache[card.id]) {
+        const response = await fetch(`https://api.scryfall.com/cards/${card.id}`);
+        if (response.ok) {
+            cardCache[card.id] = await response.json();
+        } else {
+            console.error(`Failed to fetch card ${card.name}: ${response.status}`);
+        }
+    }
+    return cardCache[card.id];
+}
+
 function loadFileFromDrive(fileId) {
-    console.log('Loading file from Google Drive with ID:', fileId);
     gapi.client.drive.files.get({
         fileId: fileId,
         alt: 'media',
-    }).then(fileResponse => {
-        console.log('Raw file response:', fileResponse.body); // Log raw content
-        let data;
-        try {
-            data = JSON.parse(fileResponse.body);
-            console.log('Parsed data:', data); // Log parsed data
-        } catch (error) {
-            console.error('JSON parse error:', error);
-            showFeedback('Failed to parse file from Google Drive: Invalid JSON format.', 'error');
-            return;
-        }
-        if (!data.name || !Array.isArray(data.cards)) {
-            console.error('Invalid structure - Expected name:', data.name, 'cards:', data.cards);
-            throw new Error('Invalid collection structure');
-        }
+    }).then(async fileResponse => {
+        let data = JSON.parse(fileResponse.body);
         currentCollection = {
             name: data.name || 'Unnamed Collection',
             description: data.description || '',
-            cards: data.cards.map(c => ({
-                card: { name: c.name, id: c.id || '' },
-                quantity: c.quantity || 1,
-                treatment: c.treatment || 'non-foil'
-            }))
+            cards: await Promise.all(data.cards.map(async c => {
+                const fullCard = await fetchFullCardData({ id: c.id, name: c.name });
+                return { card: fullCard, quantity: c.quantity || 1, treatment: c.treatment || 'non-foil' };
+            })),
+            decks: data.decks ? data.decks.map(deck => ({
+                name: deck.name,
+                format: deck.format,
+                cards: deck.cards.map(dc => ({
+                    cardId: dc.cardId,
+                    quantity: dc.quantity,
+                    treatment: dc.treatment || 'non-foil'
+                }))
+            })) : []
         };
         currentFilters = { colors: [], manaCosts: [], rarities: [] };
         searchCollectionList.value = '';
         updateCollectionList();
+        updateDeckSelectOptions();
+        updateDeckControlButtons();
         showFeedback(`Loaded collection "${currentCollection.name}" from Google Drive.`, 'success');
-        localStorage.setItem('mtgCollection', JSON.stringify({
-            name: currentCollection.name,
-            description: currentCollection.description,
-            cards: currentCollection.cards.map(({ card, quantity, treatment }) => ({ name: card.name, id: c.id || '', quantity, treatment }))
-        }));
     }).catch(error => {
-        console.error('Error loading file from Google Drive:', error);
-        showFeedback('Failed to load file from Google Drive: Invalid format or network issue.', 'error');
+        showFeedback('Failed to load file from Google Drive.', 'error');
     });
-    console.log('File loading initiated from Google Drive with ID:', fileId);
 }
 
 // Set Default Sorting Order to Set Number, Ascending
 let currentSort = { criterion: 'collector_number', direction: 'asc' };
 
 // State
-let currentCollection = { name: '', description: '', cards: [] };
+let currentCollection = { name: '', description: '', cards: [], decks: [] };
+let currentView = 'collection';
 const cardCache = {};
 let currentFilters = { colors: [], manaCosts: [], rarities: [] };
 let lastSaved = Date.now();
@@ -233,24 +233,22 @@ function showFeedback(message, type = 'info', persist = false) {
         success: [message, `${message} Nice work!`, `${message} You're on fire!`, `${message} Ready for action!`, `${message} Let's go!`],
         error: [message, `Oops, ${message.toLowerCase()}`, `Uh-oh, ${message.toLowerCase()}`, `Something went wrong: ${message.toLowerCase()}`],
         info: [message, `${message} Let's keep going!`, `${message} Good to know!`, `${message} Heads up!`],
-        loading: [message] // Loading messages don't vary
+        loading: [message]
     };
     const selectedMessage = type === 'loading' ? message : messages[type][Math.floor(Math.random() * messages[type].length)];
 
-    // Split the message into main and secondary parts after punctuation and whitespace
-    const parts = selectedMessage.split(/([.!?])\s+/); // Split after punctuation AND whitespace
-    let mainMessage = parts[0]; // Text before punctuation
+    const parts = selectedMessage.split(/([.!?])\s+/);
+    let mainMessage = parts[0];
     let secondaryMessage = '';
 
-    // If there's punctuation, include it in the main message
     if (parts.length > 1) {
-        mainMessage += parts[1]; // Add the punctuation to the main message
-        secondaryMessage = parts.slice(2).join(' ').trim(); // Remaining text after punctuation and whitespace
+        mainMessage += parts[1];
+        secondaryMessage = parts.slice(2).join(' ').trim();
     }
 
     const feedback = document.createElement('div');
     feedback.className = `feedback ${type}`;
-    feedback.id = `feedback-${Date.now()}`; // Unique ID for persistent feedback
+    feedback.id = `feedback-${Date.now()}`;
     feedback.innerHTML = `
         <div class="main-message">${mainMessage}</div>
         ${secondaryMessage ? `<div class="secondary-message">${secondaryMessage}</div>` : ''}
@@ -266,7 +264,7 @@ function showFeedback(message, type = 'info', persist = false) {
     if (!persist) {
         setTimeout(() => feedback.remove(), 10000);
     }
-    return feedback.id; // Return the ID for later updates or removal
+    return feedback.id;
 }
 
 function updateFeedback(feedbackId, message) {
@@ -296,7 +294,7 @@ function updateUIState() {
     searchCollectionList.style.display = isCollectionActive && hasCards ? 'block' : 'none';
     filterControls.style.display = isCollectionActive && hasCards ? 'flex' : 'none';
     displayCount.style.display = isCollectionActive && hasCards ? 'block' : 'none';
-    deckControlPanel.style.display = isCollectionActive && hasCards ? 'flex' : 'none';
+    deckControlPanel.style.display = isCollectionActive ? 'flex' : 'none';
 
     const sortControls = document.querySelector('.sort-controls');
     if (sortControls) {
@@ -373,14 +371,10 @@ function closeReferencesModal() {
 
 function openLoadCollectionModal(event) {
     loadCollectionModal.classList.add('active');
-
-    // Position the modal below the Load Collection button
     const button = event.target;
     const rect = button.getBoundingClientRect();
     const modalContent = loadCollectionModal.querySelector('.context-modal-content');
     modalContent.style.position = 'absolute';
-    // modalContent.style.top = `${rect.bottom + window.scrollY}px`;
-    // modalContent.style.left = `${rect.left + window.scrollX}px`;
 }
 
 function closeLoadCollectionModal() {
@@ -413,7 +407,7 @@ function loadFileFromGoogleDrive() {
 
 uploadFromDeviceBtn.addEventListener('click', () => {
     fileInput.accept = '.json';
-    fileInput.onchange = e => {
+    fileInput.onchange = async e => {
         const file = e.target.files[0];
         if (!file) return;
         if (file.size > 10 * 1024 * 1024) {
@@ -425,7 +419,7 @@ uploadFromDeviceBtn.addEventListener('click', () => {
             return;
         }
         const reader = new FileReader();
-        reader.onload = function (e) {
+        reader.onload = async function (e) {
             try {
                 const text = e.target.result.replace(/^\uFEFF/, '');
                 const data = JSON.parse(text);
@@ -435,24 +429,34 @@ uploadFromDeviceBtn.addEventListener('click', () => {
                 currentCollection = {
                     name: data.name || 'Unnamed Collection',
                     description: data.description || '',
-                    cards: data.cards.map(c => ({
-                        card: { name: c.name, id: c.id || '' },
-                        quantity: c.quantity || 1,
-                        treatment: c.treatment || 'non-foil'
-                    }))
+                    cards: await Promise.all(data.cards.map(async c => {
+                        const fullCard = await fetchFullCardData({ id: c.id, name: c.name });
+                        return { card: fullCard, quantity: c.quantity || 1, treatment: c.treatment || 'non-foil' };
+                    })),
+                    decks: data.decks ? data.decks.map(deck => ({
+                        name: deck.name,
+                        format: deck.format,
+                        cards: deck.cards.map(dc => ({
+                            cardId: dc.cardId,
+                            quantity: dc.quantity,
+                            treatment: dc.treatment || 'non-foil'
+                        }))
+                    })) : []
                 };
                 currentFilters = { colors: [], manaCosts: [], rarities: [] };
                 searchCollectionList.value = '';
                 updateCollectionList();
+                updateDeckSelectOptions();
+                updateDeckControlButtons();
+                showFeedback(`Loaded collection "${currentCollection.name}".`, 'success');
             } catch (error) {
                 console.error('Load collection error:', error);
-                showFeedback(error.message === 'Invalid collection structure' ? 'Invalid collection structure. Please check the file.' : 'Failed to load collection. Invalid JSON format.', 'error');
+                showFeedback(error.message === 'Invalid collection structure' ? 'Invalid collection structure.' : 'Failed to load collection.', 'error');
             }
             fileInput.value = '';
         };
         reader.onerror = () => {
-            console.error('FileReader error:', reader.error);
-            showFeedback('Failed to read file. Please try again.', 'error');
+            showFeedback('Failed to read file.', 'error');
             fileInput.value = '';
         };
         reader.readAsText(file);
@@ -477,9 +481,6 @@ function openCreateDeckModal() {
     console.log('Opening Create Deck modal');
     createDeckModal.style.display = 'flex';
     createDeckModal.classList.add('active');
-    // Here you can implement the logic to open a modal for creating a deck
-    // For now, we will just log it
-    // showFeedback('Create Deck functionality is not implemented yet.', 'info');
 }
 
 // Close the Create Deck Modal
@@ -488,6 +489,109 @@ function closeCreateDeckModal() {
     setTimeout(() => {
         createDeckModal.style.display = 'none';
     }, 300);
+}
+
+// Create Deck
+function createDeck() {
+    const deckName = document.getElementById('deckName').value.trim();
+    const deckFormat = document.getElementById('deckFormat').value;
+
+    if (!deckName) {
+        showFeedback('Please enter a deck name.', 'error');
+        return;
+    }
+
+    if (!currentCollection) {
+        currentCollection = { decks: [] };
+    }
+    if (!Array.isArray(currentCollection.decks)) {
+        currentCollection.decks = [];
+    }
+
+    const newDeck = {
+        name: deckName,
+        format: deckFormat,
+        cards: []
+    };
+
+    currentCollection.decks.push(newDeck);
+    const newDeckIndex = currentCollection.decks.length - 1;
+    currentView = newDeckIndex;                // Set the new deck as active
+    updateDeckSelectOptions(newDeckIndex);     // Update menu and select new deck
+    updateCollectionList();                    // Clear list (empty deck)
+    updateDeckControlButtons();                // Enable buttons
+    closeCreateDeckModal();
+    showFeedback(`Deck "${deckName}" created!`, 'success');
+}
+
+// Update Deck Select Options
+function updateDeckSelectOptions(selectedIndex = null) {
+    const deckSelect = document.getElementById('deckSelect');
+    deckSelect.innerHTML = '<option value="">Select deck...</option>';
+    currentCollection.decks.forEach((deck, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.text = deck.name;
+        deckSelect.appendChild(option);
+    });
+    if (selectedIndex !== null) {
+        deckSelect.value = selectedIndex;
+    }
+    deckSelect.disabled = currentCollection.decks.length === 0;
+}
+
+// Select Deck
+function selectDeck(deckIndex) {
+    if (deckIndex === '') {
+        currentView = 'collection';
+        showFeedback('Viewing collection.', 'info');
+    } else {
+        currentView = parseInt(deckIndex);
+        showFeedback(`Viewing deck: ${currentCollection.decks[currentView].name}`, 'info');
+    }
+    updateCollectionList();
+    updateDeckControlButtons();
+}
+
+// Close Deck
+function closeDeck() {
+    if (currentView === 'collection') {
+        showFeedback('No deck selected to close.', 'info');
+        return;
+    }
+    currentView = 'collection';
+    document.getElementById('deckSelect').value = ''; // Reset to "Select deck..."
+    updateCollectionList();                           // Show all collection cards
+    updateDeckControlButtons();                       // Disable buttons
+    showFeedback('Closed deck. Viewing collection.', 'info');
+}
+
+// Delete Deck
+function deleteDeck() {
+    if (currentView === 'collection') {
+        showFeedback('No deck selected to delete.', 'error');
+        return;
+    }
+    const deckIndex = currentView;
+    const deckName = currentCollection.decks[deckIndex].name;
+    if (confirm(`Are you sure you want to delete deck "${deckName}"?`)) {
+        currentCollection.decks.splice(deckIndex, 1);
+        currentView = 'collection';
+        updateDeckSelectOptions();                    // Refresh menu
+        document.getElementById('deckSelect').value = ''; // Reset to "Select deck..."
+        updateCollectionList();                       // Show all collection cards
+        updateDeckControlButtons();                   // Disable buttons
+        showFeedback(`Deck "${deckName}" deleted.`, 'success');
+    }
+}
+
+// Update Deck Control Buttons
+function updateDeckControlButtons() {
+    const closeDeckBtn = document.getElementById('closeDeckBtn');
+    const deleteDeckBtn = document.getElementById('deleteDeckBtn');
+    const isDeckSelected = currentView !== 'collection';
+    closeDeckBtn.disabled = !isDeckSelected;
+    deleteDeckBtn.disabled = !isDeckSelected;
 }
 
 // Close the Edit Collection Modal
@@ -525,7 +629,6 @@ function createNewCollection() {
         searchCollectionList.value = '';
         updateUIState();
         collectionNameInput.focus();
-        // showFeedback('Ready to create a new collection!', 'info'); 
     } catch (error) {
         console.error('Create new collection error:', error);
         showFeedback('Failed to initialize new collection.', 'error');
@@ -541,7 +644,7 @@ function createCollection() {
         return;
     }
 
-    currentCollection = { name, description, cards: [] };
+    currentCollection = { name, description, cards: [], decks: [] };
     isCreatingCollection = false;
     createCollectionForm.style.display = 'none';
     collectionInfoBlock.style.opacity = '0';
@@ -554,9 +657,10 @@ function createCollection() {
     document.getElementById('collectionDescriptionDisplay').innerText = description || '';
     document.getElementById('collectionDescriptionDisplay').style.display = description ? 'block' : 'none';
     updateCollectionList();
+    updateDeckSelectOptions();
+    updateDeckControlButtons();
     updateUIState();
     showFeedback(`Collection "${name}" created!`, 'success');
-    // Clear the form fields
     collectionNameInput.value = '';
     document.getElementById('collectionDescription').value = '';
 }
@@ -582,7 +686,7 @@ function openAddCardModal() {
     searchInput.focus();
     searchInput.value = '';
     searchResults.innerHTML = '';
-    searchCardsDebounced(); // Clear previous results
+    searchCardsDebounced();
 }
 
 function closeAddCardModal() {
@@ -698,30 +802,21 @@ const searchCardsDebounced = debounce(async () => {
 
 searchInput.addEventListener('input', searchCardsDebounced);
 
+// Render search results
 function displaySearchResults(cards) {
     searchResults.innerHTML = '';
     if (!cards.length) {
         searchResults.innerHTML = '<p>No cards found.</p>';
-        searchResults.classList.add('active');
         return;
     }
     const isCollectionActive = currentCollection.name !== '';
+    const hasDecks = currentCollection.decks && currentCollection.decks.length > 0;
     cards.forEach(card => {
         const div = document.createElement('div');
         div.className = 'search-result';
         const imageUrl = card.image_uris?.small || '';
-        // Calculate foil and non-foil counts for the card in the current collection
-        let foilCount = 0;
-        let nonFoilCount = 0;
-        if (isCollectionActive) {
-            foilCount = currentCollection.cards
-                .filter(c => c.card.id === card.id && c.treatment === 'foil')
-                .reduce((sum, c) => sum + c.quantity, 0);
-            nonFoilCount = currentCollection.cards
-                .filter(c => c.card.id === card.id && c.treatment === 'non-foil')
-                .reduce((sum, c) => sum + c.quantity, 0);
-        }
-        // Only show the count text if the card is in the collection (foil or non-foil count > 0) and a collection is active
+        const foilCount = isCollectionActive ? currentCollection.cards.filter(c => c.card.id === card.id && c.treatment === 'foil').reduce((sum, c) => sum + c.quantity, 0) : 0;
+        const nonFoilCount = isCollectionActive ? currentCollection.cards.filter(c => c.card.id === card.id && c.treatment === 'non-foil').reduce((sum, c) => sum + c.quantity, 0) : 0;
         const showCountText = isCollectionActive && (foilCount > 0 || nonFoilCount > 0);
         div.innerHTML = `
             <div class="content">
@@ -734,11 +829,15 @@ function displaySearchResults(cards) {
                             <option value="non-foil">Non-foil</option>
                             <option value="foil">Foil</option>
                         </select>
+                        ${hasDecks ? `
+                            <select class="text-input" id="deck-${card.id}">
+                                <option value="">Add to Collection</option>
+                                ${currentCollection.decks.map((deck, index) => `<option value="${index}">${deck.name}</option>`).join('')}
+                            </select>
+                        ` : ''}
                         <div class="add-button-container">
-                            <button class="button primary-button medium-button" onclick="addToCollection('${card.id}')">Add</button>
-                            ${showCountText ? `
-                                <span class="card-collection-count">★ ${foilCount} | 🞄 ${nonFoilCount}</span>
-                            ` : ''}
+                            <button class="button primary-button medium-button" onclick="addToCollectionOrDeck('${card.id}')">Add</button>
+                            ${showCountText ? `<span class="card-collection-count">★ ${foilCount} | 🞄 ${nonFoilCount}</span>` : ''}
                         </div>
                     </div>
                 ` : ''}
@@ -746,7 +845,6 @@ function displaySearchResults(cards) {
             ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" id="img-${card.id}" style="cursor: pointer;">` : '<p>No image available</p>'}
         `;
         searchResults.appendChild(div);
-        // Add click event to image for preview
         const img = div.querySelector(`#img-${card.id}`);
         if (img) {
             img.addEventListener('click', () => {
@@ -755,7 +853,66 @@ function displaySearchResults(cards) {
             });
         }
     });
-    searchResults.classList.add('active');
+}
+
+// Add card to collection or deck
+async function addToCollectionOrDeck(cardId) {
+    const quantityInput = document.getElementById(`qty-${cardId}`);
+    const treatmentSelect = document.getElementById(`treatment-${cardId}`);
+    const deckSelect = document.getElementById(`deck-${cardId}`);
+    const quantity = parseInt(quantityInput.value) || 1;
+    const treatment = treatmentSelect.value || 'non-foil';
+    const deckIndex = deckSelect ? deckSelect.value : '';
+
+    if (quantity < 1 || quantity > 4) {
+        showFeedback('Quantity must be between 1 and 4.', 'error');
+        return;
+    }
+
+    let fullCard = cardCache[cardId];
+    if (!fullCard) {
+        const response = await fetch(`https://api.scryfall.com/cards/${cardId}`);
+        if (!response.ok) throw new Error(`Failed to fetch card ${cardId}`);
+        fullCard = await response.json();
+        cardCache[cardId] = fullCard;
+    }
+
+    if (deckIndex === '') {
+        const existingCard = currentCollection.cards.find(c => c.card.id === cardId && c.treatment === treatment);
+        if (existingCard) {
+            existingCard.quantity += quantity;
+        } else {
+            currentCollection.cards.push({ card: fullCard, quantity, treatment });
+        }
+        showFeedback(`${quantity} × ${fullCard.name} (${treatment}) added to collection!`, 'success');
+    } else {
+        const deck = currentCollection.decks[parseInt(deckIndex)];
+        const collectionCard = currentCollection.cards.find(c => c.card.id === cardId && c.treatment === treatment);
+        if (!collectionCard) {
+            currentCollection.cards.push({ card: fullCard, quantity, treatment });
+            deck.cards.push({ cardId, quantity, treatment });
+            showFeedback(`${quantity} × ${fullCard.name} (${treatment}) added to collection and deck "${deck.name}"!`, 'success');
+        } else {
+            const availableQuantity = collectionCard.quantity;
+            const deckCard = deck.cards.find(c => c.cardId === cardId && c.treatment === treatment);
+            const currentDeckQuantity = deckCard ? deckCard.quantity : 0;
+            if (currentDeckQuantity + quantity > availableQuantity) {
+                showFeedback(`Cannot add ${quantity} copies. Only ${availableQuantity - currentDeckQuantity} available in collection.`, 'error');
+                return;
+            }
+            if (deckCard) {
+                deckCard.quantity += quantity;
+            } else {
+                deck.cards.push({ cardId, quantity, treatment });
+            }
+            showFeedback(`${quantity} × ${fullCard.name} (${treatment}) added to deck "${deck.name}"!`, 'success');
+        }
+    }
+
+    updateCollectionList();
+    searchInput.value = '';
+    searchInput.focus();
+    searchCardsDebounced();
 }
 
 // Update foil class for search result image
@@ -783,72 +940,45 @@ function updateDisplayCount() {
     displayCount.innerHTML = `Displaying ${visibleCards}/${totalCards} cards </br> • non-foil | ★ foil`;
 }
 
-// Add card to collection
+// Add card to collection & Update collection list
 async function updateCollectionList() {
-    console.log('Updating collection list, cards:', JSON.parse(JSON.stringify(currentCollection.cards)));
+    let cardsToDisplay;
+    if (currentView === 'collection') {
+        cardsToDisplay = currentCollection.cards;
+    } else {
+        const deck = currentCollection.decks[currentView];
+        cardsToDisplay = deck.cards.map(deckCard => {
+            const fullCard = cardCache[deckCard.cardId];
+            if (fullCard) {
+                return { card: fullCard, quantity: deckCard.quantity, treatment: deckCard.treatment };
+            }
+            console.warn(`Card ${deckCard.cardId} not in cache.`);
+            return null;
+        }).filter(c => c !== null);
+    }
+
+    // Apply filters
+    const filteredCards = cardsToDisplay.filter(card => {
+        const { card: fullCard } = card;
+        const colorMatch = !currentFilters.colors.length ||
+            (fullCard.color_identity && currentFilters.colors.some(color => fullCard.color_identity.includes(color))) ||
+            (fullCard.color_identity?.length === 0 && currentFilters.colors.includes('Colorless')) ||
+            (fullCard.color_identity?.length > 1 && currentFilters.colors.includes('Multicolor'));
+        const manaCostMatch = !currentFilters.manaCosts.length ||
+            currentFilters.manaCosts.some(cost => cost === 7 ? fullCard.cmc >= 7 : fullCard.cmc === cost);
+        const rarityMatch = !currentFilters.rarities.length ||
+            currentFilters.rarities.includes(fullCard.rarity.toLowerCase());
+        return colorMatch && manaCostMatch && rarityMatch;
+    });
+
+    // Sort the filtered cards
+    sortCards(filteredCards, currentSort.criterion, currentSort.direction);
+
+    // Render
     collectionCardsList.innerHTML = '';
-    const cardCounts = {};
-    let totalCards = 0;
-    const updatedCards = [];
-
-    let feedbackId = null;
-    const totalCardEntries = currentCollection.cards.length;
-    if (totalCardEntries > 0) {
-        feedbackId = showFeedback(`Loading card 0/${totalCardEntries}`, 'loading', true);
-    }
-
-    // Fetch all cards first
-    for (let i = 0; i < currentCollection.cards.length; i++) {
-        const { card, quantity, treatment } = currentCollection.cards[i];
-        let fullCard = null;
-        try {
-            console.log(`Fetching card: ${card.name}`);
-            const response = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${encodeURIComponent(card.name)}`);
-            if (!response.ok) {
-                console.error(`Failed to fetch card ${card.name}: ${response.status}`);
-                showFeedback(`Failed to load card: ${card.name}`, 'error');
-                continue;
-            }
-            fullCard = await response.json();
-            if (fullCard.card_faces && !fullCard.rarity) {
-                fullCard.rarity = fullCard.card_faces[0].rarity || 'unknown';
-                fullCard.image_uris = fullCard.image_uris || fullCard.card_faces[0].image_uris;
-                fullCard.color_identity = fullCard.color_identity || fullCard.card_faces[0].color_identity;
-                fullCard.cmc = fullCard.cmc || fullCard.card_faces[0].cmc || 0;
-                fullCard.mana_cost = fullCard.mana_cost || fullCard.card_faces[0].mana_cost || '';
-                fullCard.type_line = fullCard.type_line || fullCard.card_faces[0].type_line || 'Unknown';
-                fullCard.collector_number = fullCard.collector_number || fullCard.card_faces[0].collector_number || '9999';
-            }
-            cardCache[fullCard.id] = fullCard;
-            updatedCards.push({ card: fullCard, quantity, treatment });
-            if (feedbackId) {
-                updateFeedback(feedbackId, `Loading card ${i + 1}/${totalCardEntries}`);
-            }
-        } catch (error) {
-            console.error(`Error fetching card ${card.name}:`, error);
-            showFeedback(`Error loading card: ${card.name}`, 'error');
-            continue;
-        }
-    }
-
-    if (feedbackId) {
-        removeFeedback(feedbackId);
-        showFeedback('Collection loaded successfully!', 'success');
-    }
-
-    currentCollection.cards = updatedCards;
-    console.log('After fetch, currentCollection.cards length:', currentCollection.cards.length, JSON.parse(JSON.stringify(currentCollection.cards)));
-
-    // Sort the cards
-    sortCards(currentSort.criterion, currentSort.direction);
-
-    // Render the sorted cards
-    totalCards = 0;
-    for (const { card: fullCard, quantity, treatment } of currentCollection.cards) {
+    filteredCards.forEach(({ card: fullCard, quantity, treatment }) => {
         const rarity = fullCard.rarity || 'unknown';
         const displayRarity = rarityMap[rarity.toLowerCase()] || rarity.charAt(0).toUpperCase() + rarity.slice(1);
-        cardCounts[fullCard.name] = (cardCounts[fullCard.name] || 0) + quantity;
-        totalCards += quantity;
         const div = document.createElement('div');
         div.className = 'card-entry';
         div.dataset.cardName = fullCard.name;
@@ -870,24 +1000,19 @@ async function updateCollectionList() {
                 </tr>
             </table>
         `;
-        console.log(`Rendering card: ${fullCard.name}, id: ${fullCard.id}, foil: ${treatment === 'foil'}`);
-        div.addEventListener('click', () => {
-            console.log(`Card clicked: ${fullCard.name}, id: ${fullCard.id}, treatment: ${treatment}`);
-            openCardDetailsModal(fullCard, treatment);
-        });
+        div.addEventListener('click', () => openCardDetailsModal(fullCard, treatment));
         collectionCardsList.appendChild(div);
         setTimeout(() => div.classList.add('added'), 10);
-    }
+    });
 
-    console.log('Total rendered cards:', collectionCardsList.getElementsByClassName('card-entry').length);
+    // Update counts
+    const totalCards = cardsToDisplay.reduce((sum, c) => sum + c.quantity, 0);
     collectionCardCount.innerText = `Total Cards: ${totalCards}`;
     collectionCardCount.classList.add('updated');
     setTimeout(() => collectionCardCount.classList.remove('updated'), 200);
-    updateUIState();
-    applyFilters(); // Apply filters after rendering to respect current filter state
-    if (searchCollectionList.value) searchCollectionDebounced();
     updateDisplayCount();
-    console.log('Collection list updated, total cards:', totalCards);
+    updateUIState();
+    if (searchCollectionList.value) searchCollectionDebounced();
 }
 
 // Apply sort debug function
@@ -896,10 +1021,9 @@ function applySort() {
     currentSort.direction = sortDirectionSelect.value;
     console.log(`Applying sort: criterion=${currentSort.criterion}, direction=${currentSort.direction}`);
 
-    // Sort the current collection and reapply filters
     sortCards(currentSort.criterion, currentSort.direction);
-    updateCollectionList(); // This will render the sorted list and reapply filters
-    applyFilters(); // Ensure filters are reapplied after sorting
+    updateCollectionList();
+    applyFilters();
     showFeedback(`Collection sorted by ${currentSort.criterion} (${currentSort.direction}).`, 'success');
 }
 
@@ -922,7 +1046,6 @@ async function addToCollection(cardId) {
             return;
         }
 
-        // Fetch full card data if not in cache
         let fullCard = cardCache[cardId];
         if (!fullCard) {
             const response = await fetch(`https://api.scryfall.com/cards/${cardId}`);
@@ -931,7 +1054,6 @@ async function addToCollection(cardId) {
             cardCache[cardId] = fullCard;
         }
 
-        // Check if card already exists with the same treatment
         const existingCard = currentCollection.cards.find(c => c.card.id === cardId && c.treatment === treatment);
         if (existingCard) {
             existingCard.quantity += quantity;
@@ -940,10 +1062,9 @@ async function addToCollection(cardId) {
         }
 
         updateCollectionList();
-        // Clear search input and focus it instead of closing the modal
         searchInput.value = '';
         searchInput.focus();
-        searchCardsDebounced(); // Refresh search results after clearing
+        searchCardsDebounced();
         showFeedback(`${quantity} × ${fullCard.name} (${treatment}) added to collection!`, 'success');
     } catch (error) {
         console.error('Error adding card to collection:', error);
@@ -995,9 +1116,9 @@ function removeFromCollection(cardId, treatment) {
 }
 
 // Sorting
-function sortCards(criterion, direction = 'asc') {
+function sortCards(cards, criterion, direction = 'asc') {
     console.log('Sorting cards with criterion:', criterion, 'direction:', direction);
-    currentCollection.cards.sort((a, b) => {
+   cards.sort((a, b) => {
         let valueA, valueB, secondaryA, secondaryB, tertiaryA, tertiaryB;
         try {
             switch (criterion) {
@@ -1108,6 +1229,7 @@ function filterByManaCost(cost) {
 }
 
 function filterByRarity(rarity) {
+    console.log('Filtering by rarity:', rarity, 'Current filters:', currentFilters.rarities);
     const index = currentFilters.rarities.indexOf(rarity);
     if (index === -1) currentFilters.rarities.push(rarity);
     else currentFilters.rarities.splice(index, 1);
@@ -1127,57 +1249,7 @@ function clearFilters() {
 }
 
 function applyFilters() {
-    console.log('Applying filters:', JSON.parse(JSON.stringify(currentFilters)));
-    const filteredCards = currentCollection.cards.filter(card => {
-        const { card: fullCard } = card;
-        const colorMatch = !currentFilters.colors.length ||
-            (fullCard.color_identity && currentFilters.colors.some(color => fullCard.color_identity.includes(color))) ||
-            (fullCard.color_identity?.length === 0 && currentFilters.colors.includes('Colorless')) ||
-            (fullCard.color_identity?.length > 1 && currentFilters.colors.includes('Multicolor'));
-        const manaCostMatch = !currentFilters.manaCost ||
-            (fullCard.cmc !== undefined && (currentFilters.manaCost === 7 ? fullCard.cmc >= 7 : fullCard.cmc === currentFilters.manaCost));
-        const rarityMatch = !currentFilters.rarity ||
-            (fullCard.rarity && currentFilters.rarity.toLowerCase() === fullCard.rarity.toLowerCase());
-        return colorMatch && manaCostMatch && rarityMatch;
-    });
-
-    // Update the displayed cards with the filtered subset
-    collectionCardsList.innerHTML = '';
-    filteredCards.forEach(card => {
-        const div = document.createElement('div');
-        div.className = 'card-entry';
-        div.dataset.cardName = card.card.name;
-        div.dataset.typeLine = card.card.type_line || '';
-        div.dataset.oracleText = card.card.oracle_text || '';
-        div.dataset.colorIdentity = card.card.color_identity ? card.card.color_identity.join(',') : '';
-        div.dataset.cmc = card.card.cmc || 0;
-        div.dataset.rarity = card.card.rarity || 'unknown';
-        div.dataset.collectorNumber = card.card.collector_number || '9999';
-        const imageUrl = card.card.image_uris?.normal || '';
-        div.innerHTML = `
-            ${imageUrl ? `<img src="${imageUrl}" alt="${card.card.name}" class="${card.treatment === 'foil' ? 'foil' : ''}">` : '<p>No image available</p>'}
-            <table class="card-table">
-                <tr>
-                    <td class="quantity-cell">${card.quantity}</td>
-                    <td>${card.card.name}</td>
-                    <td title="${card.card.rarity.charAt(0).toUpperCase() + card.card.rarity.slice(1)}" class="rarity-symbol ${card.card.rarity.toLowerCase()} table-rarity-symbol">${rarityMap[card.card.rarity.toLowerCase()] || card.card.rarity.charAt(0).toUpperCase() + card.card.rarity.slice(1)}</td>
-                    <td title="${card.treatment.charAt(0).toUpperCase() + card.treatment.slice(1)}">${card.treatment === 'foil' ? '<span class="foil-star">★</span>' : '<span class="non-foil-dot">•</span>'}</td>
-                </tr>
-            </table>
-        `;
-        div.addEventListener('click', () => openCardDetailsModal(card.card, card.treatment));
-        collectionCardsList.appendChild(div);
-        setTimeout(() => div.classList.add('added'), 10);
-    });
-
-    // Reapply the current sort to the filtered cards
-    sortCards(currentSort.criterion, currentSort.direction);
-
-    // Update UI and display count
-    updateDisplayCount();
-    updateUIState();
-    if (searchCollectionList.value) searchCollectionDebounced();
-    showFeedback('Filters applied successfully!', 'success');
+    updateCollectionList();
 }
 
 // Collection search
@@ -1186,12 +1258,12 @@ const searchCollectionDebounced = debounce(() => {
     const entries = collectionCardsList.getElementsByClassName('card-entry');
     for (let i = 0; i < entries.length; i++) {
         const entry = entries[i];
-        const cardData = currentCollection.cards.find(c => c.card.name === entry.dataset.cardName); // Match card by name
+        const cardData = currentCollection.cards.find(c => c.card.name === entry.dataset.cardName);
         const name = entry.dataset.cardName.toUpperCase();
         const typeLine = entry.dataset.typeLine.toUpperCase() || '';
         const oracleText = entry.dataset.oracleText.toUpperCase() || '';
-        const text = entry.textContent || entry.innerText; // Full text content as fallback
-        const matchesSearch = name.includes(filter) || typeLine.includes(filter) || oracleText.includes(filter); // Search name, type_line, and oracle_text
+        const text = entry.textContent || entry.innerText;
+        const matchesSearch = name.includes(filter) || typeLine.includes(filter) || oracleText.includes(filter);
 
         if (matchesSearch) {
             const colors = entry.dataset.colorIdentity ? entry.dataset.colorIdentity.split(',') : [];
@@ -1225,7 +1297,7 @@ const searchCollectionDebounced = debounce(() => {
             entry.style.display = 'none';
         }
     }
-    updateDisplayCount(); // Add this line
+    updateDisplayCount();
 }, 300);
 
 searchCollectionList.addEventListener('input', searchCollectionDebounced);
@@ -1235,7 +1307,12 @@ function saveCollection() {
     const collectionData = {
         name: currentCollection.name,
         description: currentCollection.description || '',
-        cards: currentCollection.cards.map(({ card, quantity, treatment }) => ({ name: card.name, id: card.id || '', quantity, treatment }))
+        cards: currentCollection.cards.map(({ card, quantity, treatment }) => ({ name: card.name, id: card.id || '', quantity, treatment })),
+        decks: currentCollection.decks.map(deck => ({
+            name: deck.name,
+            format: deck.format,
+            cards: deck.cards.map(({ cardId, quantity, treatment }) => ({ cardId, quantity, treatment }))
+        }))
     };
     const jsonData = JSON.stringify(collectionData, null, 2);
     const blob = new Blob([jsonData], { type: 'application/json' });
@@ -1258,11 +1335,12 @@ function loadCollection(event) {
 // Unload collection
 function unloadCollection() {
     if (currentCollection.name !== '' && !confirm('This will unload the current collection. Continue?')) return;
-    currentCollection = { name: '', description: '', cards: [] };
+    currentCollection = { name: '', description: '', cards: [], decks: [] };
     updateCollectionList();
+    updateDeckSelectOptions();
+    updateDeckControlButtons();
     updateUIState();
     showFeedback('Collection unloaded.', 'success');
-    // Clear the create collection form fields
     if (createCollectionForm.style.display !== 'none') {
         collectionNameInput.value = '';
         document.getElementById('collectionDescription').value = '';
@@ -1289,11 +1367,11 @@ function resetSort() {
 
 // Function to open the import cards modal
 function openImportCardsModal() {
-    importCardsText.value = ''; // Clear the textarea
+    importCardsText.value = '';
     importCardsModal.style.display = 'flex';
     setTimeout(() => {
         importCardsModal.classList.add('active');
-    }, 10); // Minimal delay to trigger animation
+    }, 10);
 }
 
 // Function to close the import cards modal
@@ -1301,7 +1379,7 @@ function closeImportCardsModal() {
     importCardsModal.classList.remove('active');
     setTimeout(() => {
         importCardsModal.style.display = 'none';
-    }, 300); // Match fade-out to 300ms
+    }, 300);
 }
 
 // Close modal when clicking outside
@@ -1313,7 +1391,7 @@ importCardsModal.addEventListener('click', (e) => {
 
 // Function to handle file upload
 function uploadImportFile() {
-    fileInput.accept = '.txt'; // Only allow text files
+    fileInput.accept = '.txt';
     fileInput.onchange = e => {
         const file = e.target.files[0];
         if (!file) return;
@@ -1324,8 +1402,8 @@ function uploadImportFile() {
         const reader = new FileReader();
         reader.onload = function (e) {
             const text = e.target.result.replace(/^\uFEFF/, '');
-            importCardsText.value = text; // Populate the textarea with the file content
-            fileInput.value = ''; // Clear the file input
+            importCardsText.value = text;
+            fileInput.value = '';
             showFeedback('File contents loaded into textarea. Please review and click Submit.', 'success');
         };
         reader.onerror = () => {
@@ -1354,11 +1432,10 @@ async function submitImportCards() {
 
     await processArenaImport(text);
     closeImportCardsModal();
-    // Clear the textarea after submission
     importCardsText.value = '';
 }
 
-// Function to process the Arena import (reusing existing logic)
+// Function to process the Arena import
 async function processArenaImport(text) {
     try {
         const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
@@ -1369,7 +1446,6 @@ async function processArenaImport(text) {
         const newCards = [];
         let feedbackId = showFeedback(`Processing ${lines.length - 1} cards...`, 'loading', true);
 
-        // Process each line (skip the "Deck" header)
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i];
             const match = line.match(/^(\d+)\s+(.+?)\s+\(([A-Z0-9]+)\)\s+(\d+)$/);
@@ -1417,8 +1493,24 @@ async function processArenaImport(text) {
     }
 }
 
-// initialize UI and filter icons
+// Initialize UI and filter icons
 document.addEventListener('DOMContentLoaded', () => {
+    const closeDeckBtn = document.getElementById('closeDeckBtn');
+    console.log('closeDeckBtn:', closeDeckBtn);
+    if (closeDeckBtn) {
+        closeDeckBtn.addEventListener('click', closeDeck);
+    } else {
+        console.error('Element with ID "closeDeckBtn" not found');
+    }
+
+    const deleteDeckBtn = document.getElementById('deleteDeckBtn');
+    console.log('deleteDeckBtn:', deleteDeckBtn);
+    if (deleteDeckBtn) {
+        deleteDeckBtn.addEventListener('click', deleteDeck);
+    } else {
+        console.error('Element with ID "deleteDeckBtn" not found');
+    }
+
     updateUIState();
     initializeFilterIcons();
     document.querySelector('#createCollectionForm .secondary-button').onclick = cancelCreateCollection;
@@ -1436,5 +1528,9 @@ document.addEventListener('DOMContentLoaded', () => {
         showFeedback(`Sorted by ${sortCriterionSelect.value} (${sortDirectionSelect.value}).`, 'success');
     });
     resetSortButton.addEventListener('click', resetSort);
-    // initializeGapiClient();
+    document.getElementById('closeDeckBtn').addEventListener('click', closeDeck);
+    document.getElementById('deleteDeckBtn').addEventListener('click', deleteDeck);
+    document.getElementById('deckSelect').addEventListener('change', (e) => {
+        selectDeck(e.target.value);
+    });
 });
