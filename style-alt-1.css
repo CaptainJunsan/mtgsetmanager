@@ -8,26 +8,47 @@
 }
 
 :root {
-    /* DEFINE COLORS VARIABLES */
+    /* PRIMITIVE COLORS */
+    --warm-red: #ec5915;
+    --dark-bg: #222222;
+    --medium-gray: #666666;
+    --medium-sub-gray: #555555;
+    --light-gray: #e0e0e0;
+    --subtle-white: #d6d6d6;
+    --white: #ffffff;
+    --sub-black: #0a0a0a;
+    --black: #000000;
+    --transparent: rgba(0, 0, 0, 0);
+    --transparent-bg: #0000009c;
+
+
+    /* TOKEN COLORS */
 
     /* Button BG colors */
-    --primary-button-bg: #ec5915;
-    --secondary-button-bg: #222222;
-    --disabled-button-bg: #666666;
+    --primary-button-bg: var(--warm-red);
+    --secondary-button-bg: var(--dark-bg);
+    --disabled-button-bg: var(--medium-gray);
 
-    /* Button text colors*/
-    --primary-button-text: #e0e0e0;
-    --secondary-button-text: #e0e0e0;
-    --disabled-button-text: #d6d6d6;
+    /* Button text colors */
+    --primary-button-text: var(--light-gray);
+    --secondary-button-text: var(--light-gray);
+    --disabled-button-text: var(--subtle-white);
+
+    /* Text colors */
+    --text-color: var(--light-gray);
+    --text-focus: var(--warm-red);
+
+    /* Form input colors */
+    --text-input-bg: var(--dark-bg);
 
     /* Border colors */
-    --light-border: #e0e0e0;
-    --medium-border: #555555;
-    --dark-border: #222222;
+    --light-border: var(--light-gray);
+    --medium-border: var(--medium-sub-gray);
+    --dark-border: var(--dark-bg);
 
     /* Page colors*/
-    --page-bg: #0a0a0a;
-    --modal-overlay-bg: #0000009c;
+    --page-bg: var(--sub-black);
+    --modal-overlay-bg: var(--transparent-bg);
 
     /* DEFINE FONT SPECIFIC VARIABLES */
     --font: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -35,6 +56,19 @@
     --text-weight: 400;
     --light-weight: 300;
     --bold-weight: 600; 
+
+    /* Desktop Font Sizing */
+    --font-size-base: 16px;
+    --container-title: 24px;
+    --page-title: 32px;
+    --large-title: 32px;
+
+    /* Mobile Font Sizing */
+    --font-size-base-mobile: 14px;
+    --container-title-mobile: 20px;
+    --page-title-mobile: 28px;
+    --large-title-mobile: 28px;
+
     /* --------- */
 
     /* DEFINE RESPONSIVE VARIABLES: padding, font-sizes, et. */
@@ -48,8 +82,8 @@
     width: 100%;
     margin-bottom: 10px;
     background: #0a0a0a;
-    color: #e0e0e0;
-    font-family: 'Alegreya', Arial, sans-serif;
+    color: var(--text-color);
+    font-family: var(--font);
     font-weight: 400;
     cursor: text;
 }
@@ -66,7 +100,7 @@
 }
 
 #addCardModalTitle {
-    font-family: 'Cinzel', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 700;
     font-size: 24px;
     color: #e0e0e0;
@@ -80,7 +114,7 @@
     border: none;
     border-radius: 99px;
     cursor: pointer;
-    font-family: 'Cinzel', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 700;
     transition: 300ms;
     width: auto;
@@ -98,7 +132,7 @@
     background-color: #000000;
     color: #e0e0e0;
     cursor: pointer;
-    font-family: 'Cinzel', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 700;
     transition: 300ms;
     width: auto;
@@ -140,7 +174,7 @@
     border-radius: 99px;
     cursor: pointer;
     font-size: 14px;
-    font-family: 'Cinzel', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 700;
     margin-right: 5px;
     transition: 300ms;
@@ -172,7 +206,7 @@
     border-radius: 99px;
     cursor: pointer;
     font-size: 14px;
-    font-family: 'Cinzel', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 700;
     margin-right: 5px;
     transition: 300ms;
@@ -403,7 +437,7 @@ body {
 }
 
 #mainHeader h5 {
-    font-family: 'Cinzel', Arial, sans-serif;
+    font-family: var(--font);
     font-size: 24px;
     font-weight: 700;
     color: #e0e0e0;
@@ -448,7 +482,7 @@ body {
     margin-bottom: 15px;
     font-size: 20px;
     color: #e0e0e0;
-    font-family: 'Cinzel', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 700;
 }
 
@@ -470,7 +504,7 @@ footer {
 footer a {
     color: #ec5915;
     cursor: pointer;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 400;
     text-decoration: none;
 }
@@ -481,17 +515,18 @@ footer a:hover {
 
 h5,
 h3 {
-    font-family: 'Cinzel', Arial, sans-serif;
+    font-family: var(--font);
+
     font-weight: 700;
 }
 
 p {
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 400;
 }
 
 #collectionCardCount {
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 400;
     color: #e0e0e0;
     transition: transform 0.2s ease-in-out;
@@ -502,7 +537,7 @@ p {
 }
 
 #displayCount {
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 400;
     color: #e0e0e0;
     text-align: center;
@@ -679,13 +714,13 @@ p {
 .card-details-modal .card-details-content {
     text-align: center;
     color: #e0e0e0;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 400;
     width: 100%;
 }
 
 .card-details-modal .card-details-content h3 {
-    font-family: 'Cinzel', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 700;
     font-size: 24px;
     margin-bottom: 15px;
@@ -693,7 +728,7 @@ p {
 }
 
 .type-line {
-    font-family: 'Cinzel', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 400;
 }
 
@@ -806,7 +841,7 @@ p {
     flex-direction: column;
     align-items: center;
     color: #e0e0e0;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 400;
     opacity: 0;
     transition: opacity 300ms ease-in-out;
@@ -817,7 +852,7 @@ p {
 }
 
 .references-modal .modal-content h3 {
-    font-family: 'Cinzel', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 700;
     margin-bottom: 15px;
 }
@@ -852,7 +887,7 @@ p {
     font-size: 24px;
     cursor: pointer;
     color: #e0e0e0;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 400;
 }
 
@@ -868,7 +903,7 @@ p {
 .card-table td {
     padding: 4px, 6px;
     text-align: left;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 400;
     height: 24px;
     vertical-align: middle;
@@ -876,7 +911,7 @@ p {
 
 .card-table td:nth-child(2) {
     font-weight: bold;
-    font-family: 'Cinzel', Arial, sans-serif;
+    font-family: var(--font);
     white-space: normal;
 }
 
@@ -944,7 +979,7 @@ p {
 .card-collection-count {
     font-size: 12px;
     color: #ec5915;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 400;
     height: 16px;
     /* Single-line height */
@@ -1013,11 +1048,11 @@ p {
 
 .search-result span.card-name {
     font-weight: bold;
-    font-family: 'Cinzel', Arial, sans-serif;
+    font-family: var(--font);
 }
 
 .search-result div:not(.inputs) {
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 400;
 }
 
@@ -1096,7 +1131,7 @@ p {
     font-size: 24px;
     cursor: pointer;
     color: #e0e0e0;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 400;
 }
 
@@ -1115,7 +1150,7 @@ p {
     border-radius: 7px;
     resize: vertical;
     background: #0a0a0a;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: var(--font);
     font-size: 16px;
     color: #e0e0e0;
     box-sizing: border-box;
@@ -1230,7 +1265,7 @@ p {
 }
 
 .filter-group label {
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 400;
     font-size: 14px;
     color: #e0e0e0;
@@ -1272,7 +1307,7 @@ p {
     padding: 12px 48px 12px 24px;
     /* Increased padding-right from 36px to 48px for more gap */
     border-radius: 10px;
-    font-family: 'Cinzel', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 700;
     font-size: 16px;
     color: #e0e0e0;
@@ -1304,14 +1339,14 @@ p {
 
 /* Main message in Cinzel */
 .feedback .main-message {
-    font-family: 'Cinzel', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 700;
     font-size: 16px;
 }
 
 /* Secondary message in Alegreya */
 .feedback .secondary-message {
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 400;
     font-size: 14px;
     margin-top: 2px;
@@ -1400,14 +1435,14 @@ p {
     width: 100%;
     background: #0a0a0a;
     color: #e0e0e0;
-    font-family: 'Cinzel', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 700;
 }
 
 #emptyPage a {
     color: #ec5915;
     cursor: pointer;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 400;
 }
 
@@ -1435,11 +1470,12 @@ body *::-webkit-scrollbar {
 }
 
 #quickCardSearchButton {
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 400;
     font-size: 16px;
     text-align: start;
     width: 100%;
+    margin-bottom: 0;
 
     border-radius: 7px;
     padding: 10px;
@@ -1565,7 +1601,7 @@ body *::-webkit-scrollbar {
 .context-modal-content li {
     padding: 10px 15px;
     color: #e0e0e0;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: var(--font);
     font-weight: 400;
     font-size: 16px;
     cursor: pointer;
