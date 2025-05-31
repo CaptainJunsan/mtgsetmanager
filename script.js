@@ -1649,10 +1649,10 @@ function switchStyle(){
     const currentStylesheet = document.querySelector('link[rel="stylesheet"]').href;
     console.log('Current stylesheet:', currentStylesheet);
     if (currentStylesheet.includes('style.css')) {
-        console.log('Switching to dark style.css');
+        console.log('Switching to alternate style.css');
         changeCSS('style-alt-1.css');
     } else if (currentStylesheet.includes('style-alt-1.css')) {
-        console.log('Switching to light style.css');
+        console.log('Switching to original style.css');
         changeCSS('style.css');
     }
 }
