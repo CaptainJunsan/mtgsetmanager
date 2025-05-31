@@ -1632,6 +1632,31 @@ async function processArenaImport(text) {
     }
 }
 
+// Switch CSS file
+function changeCSS(file) {
+    let link = document.querySelector('link[rel="stylesheet"] [href*="style"]') || document.createElement('link');
+
+    link.rel = 'stylesheet';
+    link.href = file;
+
+    if (!link.parentNode) {
+        document.head.appendChild(link);
+    }
+}
+
+function switchStyle(){
+    // Add conditional logic to determine current stylesheet and switch to alternate
+    const currentStylesheet = document.querySelector('link[rel="stylesheet"]').href;
+    console.log('Current stylesheet:', currentStylesheet);
+    if (currentStylesheet.includes('style.css')) {
+        console.log('Switching to dark style.css');
+        changeCSS('style-alt-1.css');
+    } else if (currentStylesheet.includes('style-alt-1.css')) {
+        console.log('Switching to light style.css');
+        changeCSS('style.css');
+    }
+}
+
 // Initialize UI and filter icons
 document.addEventListener('DOMContentLoaded', () => {
     const closeDeckBtn = document.getElementById('closeDeckBtn');
