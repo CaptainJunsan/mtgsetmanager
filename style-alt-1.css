@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 /* Ensure box-sizing is applied globally to prevent overflow */
 *,
@@ -10,24 +11,40 @@
 :root {
     /* PRIMITIVE COLORS */
     --warm-red: #ec5915;
+    --light-red: #ff7f50;
+    --dark-red: #c03b13;
     --dark-bg: #222222;
+    --dark-gray: #333333;
     --medium-gray: #666666;
     --medium-sub-gray: #555555;
     --light-gray: #e0e0e0;
     --subtle-white: #d6d6d6;
+    --transparent-white: #ffffffbe;
     --white: #ffffff;
     --sub-black: #0a0a0a;
     --black: #000000;
     --transparent: rgba(0, 0, 0, 0);
     --transparent-bg: #0000009c;
 
+    --success-color: #28a745;
+    --error-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+
 
     /* TOKEN COLORS */
 
     /* Button BG colors */
     --primary-button-bg: var(--warm-red);
+    --primary-button-hover-bg: var(--light-red);
     --secondary-button-bg: var(--dark-bg);
+    --secondary-button-hover-bg: var(--dark-gray);
     --disabled-button-bg: var(--medium-gray);
+
+    /* Button and text-input border colors */
+    --primary-button-border: var(--dark-red);
+    --secondary-button-border: var(--subtle-white);
+    --text-input-border: var(--medium-sub-gray);
 
     /* Button text colors */
     --primary-button-text: var(--light-gray);
@@ -40,6 +57,8 @@
 
     /* Form input colors */
     --text-input-bg: var(--dark-bg);
+    --text-input-border: var(--medium-sub-gray);
+    --text-input-placeholder: var(--text-input-placeholder);
 
     /* Border colors */
     --light-border: var(--light-gray);
@@ -52,39 +71,64 @@
 
     /* DEFINE FONT SPECIFIC VARIABLES */
     --font: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --card-title-font: 'Cinzel', serif;
     --heading-weight: 700;
+    --button-weight: 600;
+    --medium-weight: 500;
     --text-weight: 400;
     --light-weight: 300;
     --bold-weight: 600; 
 
     /* Desktop Font Sizing */
-    --font-size-base: 16px;
+    --font-size-base: 14px;
+    --font-size-small: 11px;
+    --button-text-size: 14px;
+    --small-button-text-size: 12px;
     --container-title: 24px;
-    --page-title: 32px;
-    --large-title: 32px;
+    --page-title: 28px;
+    --large-title: 28px;
 
     /* Mobile Font Sizing */
-    --font-size-base-mobile: 14px;
-    --container-title-mobile: 20px;
-    --page-title-mobile: 28px;
-    --large-title-mobile: 28px;
+    --font-size-base-mobile: 12px;
+    --font-size-small-mobile: 10px;
+    --button-text-size-mobile: 12px;
+    --small-button-text-size-mobile: 10px;
+    --container-title-mobile: 18px;
+    --page-title-mobile: 24px;
+    --large-title-mobile: 24px;
+
+    /* Desktop Border Radii and Padding */
+    --button-border-radius: 7px;
+    --text-input-border-radius: 5px;
+    --modal-border-radius: 13px;
+    --button-padding: 10px 15px;
+    --medium-button-padding: 9px 13px;
+    --small-button-padding: 5px 10px;
+    --text-input-padding: 10px;
+
+    /* Mobile Border Radii and Padding */
+    --button-border-radius-mobile: 5px;
+    --text-input-border-radius-mobile: 3px;
+    --modal-border-radius-mobile: 10px;
+    --button-padding-mobile: 8px 12px;
+    --medium-button-padding-mobile: 7px 10px;
+    --small-button-padding-mobile: 4px 8px;
+    --text-input-padding-mobile: 8px;
 
     /* --------- */
-
-    /* DEFINE RESPONSIVE VARIABLES: padding, font-sizes, et. */
 }
 
 .text-input {
-    padding: 8px;
-    border: 1px solid #555;
-    border-radius: 7px;
-    font-size: 16px;
+    padding: var(--text-input-padding);
+    border: 2px solid var(--text-input-border);
+    border-radius: var(--text-input-border-radius);
+    font-size: var(--button-text-size);
     width: 100%;
     margin-bottom: 10px;
-    background: #0a0a0a;
+    background: var(--text-input-bg);
     color: var(--text-color);
     font-family: var(--font);
-    font-weight: 400;
+    font-weight: var(--light-weight);
     cursor: text;
 }
 
@@ -101,21 +145,22 @@
 
 #addCardModalTitle {
     font-family: var(--font);
-    font-weight: 700;
-    font-size: 24px;
-    color: #e0e0e0;
+    font-weight: var(--heading-weight);
+    font-size: var(--large-title);
+    color: var(--text-color);
     margin-bottom: 10px;
 }
 
 .primary-button {
-    background: linear-gradient(135deg, #ec7615, #ec5915, #c03b13);
-    box-shadow: inset 0 0 5px #ffd45d88;
-    color: #e0e0e0;
-    border: none;
-    border-radius: 7px;
+    background-color: var(--primary-button-bg);
+    color: var(--primary-button-text);
+    border: 2px solid var(--primary-button-border);
+    border-radius: var(--button-border-radius);
     cursor: pointer;
     font-family: var(--font);
-    font-weight: 700;
+    font-weight: var(--button-weight);
+    font-size: var(--button-text-size);
+    padding: var(--button-padding);
     transition: 300ms;
     width: auto;
     white-space: nowrap;
@@ -123,17 +168,19 @@
 }
 
 .primary-button:hover {
-    box-shadow: inset 0 0 9px #ffd45d;
+    background-color: var(--primary-button-hover-bg);
 }
 
 .secondary-button {
-    border: solid 1px white;
-    border-radius: 7px;
-    background-color: #000000;
-    color: #e0e0e0;
+    background-color: var(--secondary-button-bg);
+    border: solid 2px var(--secondary-button-border);
+    border-radius: var(--button-border-radius);
+    color: var(--secondary-button-text);
     cursor: pointer;
     font-family: var(--font);
-    font-weight: 700;
+    font-weight: var(--button-weight);
+    font-size: var(--button-text-size);
+    padding: var(--button-padding);
     transition: 300ms;
     width: auto;
     white-space: nowrap;
@@ -141,17 +188,17 @@
 }
 
 .secondary-button:hover {
-    box-shadow: inset 0 0 5px #ffffff88;
+    background-color: var(--secondary-button-hover-bg);
 }
 
 .medium-button {
-    padding: 10px 15px;
-    font-size: 16px;
+    padding: var(--medium-button-padding);
+    font-size: var(--button-text-size);
 }
 
 .small-button {
-    padding: 6px 12px;
-    font-size: 14px;
+    padding: var(--small-button-padding);
+    font-size: var(--small-button-text-size);
 }
 
 #editCollectionBtn {
@@ -159,10 +206,9 @@
 }
 
 .button:disabled {
-    background: #666 !important;
+    background: var(--disabled-button-bg);
     border: none;
-    box-shadow: inset 0 0 5px #ffffff88;
-    color: #ffffff7a;
+    color: var(--disabled-button-text);
     cursor: not-allowed;
 }
 
@@ -527,8 +573,9 @@ p {
 
 #collectionCardCount {
     font-family: var(--font);
-    font-weight: 400;
-    color: #e0e0e0;
+    font-size: var(--font-size-small);
+    font-weight: var(--light-weight);
+    color: var(--text-color);
     transition: transform 0.2s ease-in-out;
 }
 
@@ -538,8 +585,9 @@ p {
 
 #displayCount {
     font-family: var(--font);
-    font-weight: 400;
-    color: #e0e0e0;
+    font-size: var(--font-size-small);
+    font-weight: var(--light-weight);
+    color: var(--text-color);
     text-align: center;
     margin: 10px 0;
 }
@@ -596,12 +644,6 @@ p {
 
 .card-entry.removed {
     opacity: 0;
-}
-
-.card-entry.dragging {
-    cursor: grabbing;
-    opacity: 0.5;
-    transform: scale(1.05);
 }
 
 .card-entry .particle-effect {
@@ -720,7 +762,7 @@ p {
 }
 
 .card-details-modal .card-details-content h3 {
-    font-family: var(--font);
+    font-family: var(--card-title-font);
     font-weight: 700;
     font-size: 24px;
     margin-bottom: 15px;
