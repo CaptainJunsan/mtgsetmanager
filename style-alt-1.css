@@ -34,6 +34,9 @@
 
     /* TOKEN COLORS */
 
+    /* Accents */
+    --accent-color-red: var(--warm-red);
+
     /* Button BG colors */
     --primary-button-bg: var(--warm-red);
     --primary-button-hover-bg: var(--light-red);
@@ -120,7 +123,7 @@
 
 .text-input {
     padding: var(--text-input-padding);
-    border: 2px solid var(--text-input-border);
+    border: 1px solid var(--text-input-border);
     border-radius: var(--text-input-border-radius);
     font-size: var(--button-text-size);
     width: 100%;
@@ -668,7 +671,7 @@ p {
 }
 
 .card-entry .particle-effect::before {
-    animation-delay: 0.1s;
+    animation-delay: 100ms;
     transform: translate(-20px, -20px);
 }
 
@@ -873,7 +876,7 @@ p {
 
 .references-modal .modal-content {
     background: #0f0f0f;
-    border-radius: 7px;
+    border-radius: var(--modal-border-radius);
     padding: 20px;
     width: 95vw;
     max-width: 800px;
@@ -884,9 +887,9 @@ p {
     align-items: center;
     color: #e0e0e0;
     font-family: var(--font);
-    font-weight: 400;
+    font-size: var(--font-size-base);
+    font-weight: var(--text-weight);
     opacity: 0;
-    transition: opacity 300ms ease-in-out;
 }
 
 .references-modal.active .modal-content {
@@ -895,7 +898,7 @@ p {
 
 .references-modal .modal-content h3 {
     font-family: var(--font);
-    font-weight: 700;
+    font-weight: var(--heading-weight);
     margin-bottom: 15px;
 }
 
@@ -910,12 +913,12 @@ p {
 }
 
 .references-modal .modal-content a {
-    color: #ec5915;
+    color: var(--accent-color-red);
     text-decoration: none;
 }
 
 .references-modal .modal-content a:hover {
-    color: #c03b13;
+    color: var(--dark-red);
 }
 
 .references-modal .close-button {
@@ -1110,7 +1113,6 @@ p {
 
 .modal.active {
     display: flex;
-    animation: fadeIn 300ms ease-in-out;
 }
 
 .modal-content {

@@ -351,16 +351,6 @@ function updateFilterButtonText() {
     filterToggleButton.innerText = `Filter${filterCount > 0 ? `: ${filterCount}` : ''}`;
 }
 
-// Modal handlers
-// document.addEventListener('click', (e) => {
-//     if (e.target.classList.contains('modal') && !e.target.classList.contains('context-modal')) {
-//         e.target.classList.remove('active');
-//         setTimeout(() => {
-//             e.target.style.display = 'none';
-//         }, 300);
-//     }
-// });
-
 // References modal handlers
 function openReferencesModal() {
     referencesModal.style.display = 'flex';
@@ -369,9 +359,7 @@ function openReferencesModal() {
 
 function closeReferencesModal() {
     referencesModal.classList.remove('active');
-    setTimeout(() => {
-        referencesModal.style.display = 'none';
-    }, 300);
+    referencesModal.style.display = 'none';
 }
 
 function openLoadCollectionModal(event) {

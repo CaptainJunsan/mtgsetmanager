@@ -1011,7 +1011,6 @@ p {
 
 .modal.active {
     display: flex;
-    animation: fadeIn 300ms ease-in-out;
 }
 
 .modal-content {
@@ -1028,7 +1027,6 @@ p {
     align-self: flex-start;
     margin-top: 5vh;
     opacity: 0;
-    transition: opacity 300ms ease-in-out;
 }
 
 .modal.active .modal-content {
