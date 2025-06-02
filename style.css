@@ -14,7 +14,6 @@
     border-radius: 7px;
     font-size: 16px;
     width: 100%;
-    margin-bottom: 10px;
     background: #0a0a0a;
     color: #e0e0e0;
     font-family: 'Alegreya', Arial, sans-serif;
@@ -28,7 +27,7 @@
 
 #searchCollectionList {
     display: block;
-    margin: 0 auto;
+    margin: 0;
     width: 30vw;
     min-width: 200px;
 }
@@ -41,19 +40,32 @@
     margin-bottom: 10px;
 }
 
+.button {
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 99px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-weight: 400;
+    width: auto;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.button:disabled {
+    background: #666 !important;
+    border: none;
+    box-shadow: inset 0 0 5px #ffffff88;
+    color: #ffffff7a;
+    cursor: not-allowed;
+}
+
 .primary-button {
     background: linear-gradient(135deg, #ec7615, #ec5915, #c03b13);
     box-shadow: inset 0 0 5px #ffd45d88;
     color: #e0e0e0;
     border: none;
-    border-radius: 99px;
-    cursor: pointer;
-    font-family: 'Cinzel', serif;
-    font-weight: 700;
     transition: 300ms;
-    width: auto;
-    white-space: nowrap;
-    display: inline-block;
 }
 
 .primary-button:hover {
@@ -62,16 +74,9 @@
 
 .secondary-button {
     border: solid 1px white;
-    border-radius: 99px;
     background-color: #000000;
     color: #e0e0e0;
-    cursor: pointer;
-    font-family: 'Cinzel', serif;
-    font-weight: 700;
     transition: 300ms;
-    width: auto;
-    white-space: nowrap;
-    display: inline-block;
 }
 
 .secondary-button:hover {
@@ -86,14 +91,42 @@
 .small-button {
     padding: 6px 12px;
     font-size: 14px;
+    font-weight: 400;
 }
 
-.button:disabled {
-    background: #666 !important;
-    border: none;
-    box-shadow: inset 0 0 5px #ffffff88;
-    color: #ffffff7a;
-    cursor: not-allowed;
+.container-control-button {
+    padding: 6px 12px;
+    height: 32px !important;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.active-list-view-controls {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    position: sticky;
+    z-index: 101;
+}
+
+.left-controls {
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+    gap: 10px;
+    width: auto;
+}
+
+.right-controls {
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+    align-items: center;
+    gap: 10px;
+    width: auto;
 }
 
 .filter-button {
@@ -274,6 +307,7 @@
 .button-group {
     display: flex;
     justify-content: flex-start;
+    align-items: center;
     gap: 10px;
     /* margin-bottom: 10px; */
 }
@@ -282,7 +316,7 @@
     margin-top: 10px;
 }
 
-#createCollectionForm > .button-group {
+#createCollectionForm>.button-group {
     flex-direction: row-reverse;
 }
 
@@ -304,6 +338,8 @@ body {
 }
 
 .full-width {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     max-width: 100%;
 }
@@ -405,6 +441,25 @@ body {
     background: #0a0a0a;
     width: 100%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.container-control-row {
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+    padding: 0;
+}
+
+.container-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 400;
+    font-size: 12px;
+    margin-bottom: 5px;
+    color: #e0e0e0;
+    padding-bottom: 5px;
+
+    flex-grow: 1;
+    border-bottom: 1px solid #333;
 }
 
 .has-shadow {
@@ -578,7 +633,7 @@ p {
     max-width: 100%;
     height: auto;
     border-radius: 10px;
-    transition: transform 300ms;
+    transition: transform 100ms ease-in-out;
 }
 
 .card-gallery {
@@ -605,17 +660,11 @@ p {
 }
 
 .card-entry.added {
-    animation: cardAdd 300ms ease-in-out;
+    animation: cardAdd 100ms ease-in-out;
 }
 
 .card-entry.removed {
     opacity: 0;
-}
-
-.card-entry.dragging {
-    cursor: grabbing;
-    opacity: 0.5;
-    transform: scale(1.05);
 }
 
 .card-entry .particle-effect {
@@ -636,7 +685,7 @@ p {
     height: 8px;
     background: #ffd45d;
     border-radius: 50%;
-    animation: sparkle 300ms ease-out forwards;
+    animation: sparkle 100ms ease-out forwards;
 }
 
 .card-entry .particle-effect::before {
@@ -715,10 +764,27 @@ p {
     align-self: flex-start;
     margin-top: 5vh;
     opacity: 0;
+    gap: 10px;
 }
 
 .modal.active .modal-content {
     opacity: 1;
+}
+
+.modal-content label {
+    font-family: "Alegreya", serif;
+}
+
+#createDeckModal .button-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+}
+
+#importCardsSubmitBtn {
+    margin-left: auto;
 }
 
 .card-details-modal {
@@ -1214,12 +1280,15 @@ p {
     background: #555;
 }
 
+#sortFilterControlsContainer {
+    height: 110px;
+}
+
 .filter-controls {
     visibility: hidden;
     height: 0;
     overflow: hidden;
-    /* margin: 0; */
-    margin-bottom: 50px;
+    margin-bottom: 10px;
     opacity: 0;
     flex-direction: row;
     gap: 10px;
@@ -1242,7 +1311,6 @@ p {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    margin-bottom: 10px;
 }
 
 .filter-row {
@@ -1527,8 +1595,8 @@ body *::-webkit-scrollbar {
 .context-modal {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
+    /* top: 0;
+    left: 0; */
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
@@ -1550,8 +1618,7 @@ body *::-webkit-scrollbar {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     opacity: 0;
     left: auto;
-    top: 75px;
-    right: 20px;
+    top: 15vh;
 }
 
 .context-modal.active .context-modal-content {
@@ -1604,7 +1671,8 @@ body *::-webkit-scrollbar {
 }
 
 #collectionForDeckList .card-entry.selected {
-    border: 2px solid #ff4500; /* Red-orange border */
+    border: 2px solid #ff4500;
+    /* Red-orange border */
     border-radius: 7px;
 }
 
@@ -1719,7 +1787,8 @@ body *::-webkit-scrollbar {
         text-align: center;
     }
 
-    .result-list-mana-text, .results-more-info-text {
+    .result-list-mana-text,
+    .results-more-info-text {
         text-align: center;
     }
 
@@ -1886,6 +1955,22 @@ body *::-webkit-scrollbar {
     #appTitle {
         text-align: center;
         white-space: nowrap;
+    }
+
+    .container-control-row {
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container-control-row .button-group {
+        margin-top: 10px;
+    }
+
+    .container-control-row .text-input {
+        width: 100%;
+        max-width: none;
     }
 }
 

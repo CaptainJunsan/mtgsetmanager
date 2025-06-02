@@ -44,114 +44,136 @@
                 <option value="Modern">Modern</option>
             </select> -->
             <div class="button-group">
-                <button id="createCollectionFormButton" class="button primary-button medium-button" onclick="createCollection()" disabled>Create</button>
-                <button class="button secondary-button medium-button" onclick="updateUIState()">Cancel</button>
+                <button id="createCollectionFormButton" class="button primary-button small-button"
+                    onclick="createCollection()" disabled>Create</button>
+                <button class="button secondary-button small-button" onclick="updateUIState()">Cancel</button>
             </div>
         </div>
         <div id="collectionInfo" class="display-container full-width" style="display: none;">
-            <div class="title-row">
-                <h3 id="collectionNameDisplay">Collection: Unnamed</h3>
-                <p id="collectionDescriptionDisplay" style="display: none;"></p>
-                <a id="editCollectionInfoLink" class="text-link" onclick="openEditCollectionModal()">Edit</a>
-            </div>
-            <br>
-            <div class="button-group">
-                <button class="button primary-button small-button" onclick="openAddCardModal()">Add Cards</button>
-                <button class="button secondary-button small-button" onclick="saveCollection()">Save
-                    Collection</button>
-                <button class="button secondary-button small-button" onclick="openImportCardsModal()">Import...</button>
-                <button class="button secondary-button small-button" onclick="unloadCollection()">Unload
-                    Collection</button>
+            <p class="container-title">Currect collection</p>
+            <div class="container-control-row">
+                <div class="title-row">
+                    <h3 id="collectionNameDisplay">Collection: Unnamed</h3>
+                    <p id="collectionDescriptionDisplay" style="display: none;"></p>
+                    <a id="editCollectionInfoLink" class="text-link" onclick="openEditCollectionModal()">Edit</a>
+                </div>
+                <div class="button-group">
+                    <button class="button primary-button container-control-button" onclick="openAddCardModal()">Add
+                        Cards</button>
+                    <button class="button secondary-button container-control-button" onclick="saveCollection()">Save
+                        Collection</button>
+                    <button class="button secondary-button container-control-button" onclick="unloadCollection()">Unload
+                        Collection</button>
+                </div>
             </div>
             <p id="collectionCardCount">Collection cards: 0</p>
         </div>
         <div id="deckControlPanel" class="display-container full-width" style="display: none;">
-            <h3 id="deckControlTitle">Deck Control Panel</h3>
-            <div class="button-group">
-                <button class="button primary-button small-button" onclick="openCreateDeckModal()">Create Deck</button>
-                <button id="addCardsToDeckBtn" class="button primary-button small-button"
-                    onclick="openAddCardModalWithDestination()">Add Cards</button>
-                <select id="deckSelect" class="text-input length-medium" disabled>
-                    <option value="">Select deck...</option>
-                </select>
-                <button id="closeDeckBtn" class="button secondary-button small-button" disabled>Close Deck</button>
-                <button id="deleteDeckBtn" class="button secondary-button small-button" disabled>Delete Deck</button>
-            </div>
-        </div>
-        <div id="collectionList" class="display-container full-width has-shadow" style="display: none;">
-            <h3 class="title">Collection List</h3>
-            <div class="sort-filter-container">
-                <button id="sortToggleButton" class="secondary-button small-button"
-                    onclick="toggleSortControls()">Sort</button>
-                <button id="filterToggleButton" class="secondary-button small-button"
-                    onclick="toggleFilterControls()">Filter</button>
-            </div>
-            <div id="sortControls" class="sort-controls">
-                <select id="sortCriterion" class="text-input length-medium">
-                    <option value="collector_number" selected>Set Number</option>
-                    <option value="name">Name</option>
-                    <option value="cmc">Mana Cost</option>
-                    <option value="color">Mana Color</option>
-                    <option value="rarity">Rarity</option>
-                </select>
-                <select id="sortDirection" class="text-input length-medium">
-                    <option value="asc">Ascending</option>
-                    <option value="desc">Descending</option>
-                </select>
-                <button id="resetSortButton" class="button secondary-button small-button">Reset</button>
-            </div>
-            <div id="filterControls" class="filter-controls">
-                <div class="filter-row">
-                    <div class="filter-group">
-                        <label>Color</label>
-                        <div class="gap-5">
-                            <button class="filter-button color-w" onclick="filterByColor('W')">{W}</button>
-                            <button class="filter-button color-u" onclick="filterByColor('U')">{U}</button>
-                            <button class="filter-button color-b" onclick="filterByColor('B')">{B}</button>
-                            <button class="filter-button color-r" onclick="filterByColor('R')">{R}</button>
-                            <button class="filter-button color-g" onclick="filterByColor('G')">{G}</button>
-                            <button class="filter-button color-colorless"
-                                onclick="filterByColor('Colorless')">{C}</button>
-                            <button class="filter-button color-multicolor"
-                                onclick="filterByColor('Multicolor')">Multicolor</button>
-                        </div>
-                    </div>
-                    <div class="filter-group">
-                        <label>Mana Cost</label>
-                        <div class="gap-5">
-                            <button class="filter-button" onclick="filterByManaCost(0)">0</button>
-                            <button class="filter-button" onclick="filterByManaCost(1)">1</button>
-                            <button class="filter-button" onclick="filterByManaCost(2)">2</button>
-                            <button class="filter-button" onclick="filterByManaCost(3)">3</button>
-                            <button class="filter-button" onclick="filterByManaCost(4)">4</button>
-                            <button class="filter-button" onclick="filterByManaCost(5)">5</button>
-                            <button class="filter-button" onclick="filterByManaCost(6)">6</button>
-                            <button class="filter-button" onclick="filterByManaCost(7)">7+</button>
-                        </div>
-                    </div>
-                    <div class="filter-group">
-                        <label>Rarity</label>
-                        <div class="gap-5">
-                            <button class="filter-button-rarity common" id="commonFilterBtn"
-                                onclick="filterByRarity('common')">Common</button>
-                            <button class="filter-button-rarity uncommon" id="uncommonFilterBtn"
-                                onclick="filterByRarity('uncommon')">Uncommon</button>
-                            <button class="filter-button-rarity rare" id="rareFilterBtn"
-                                onclick="filterByRarity('rare')">Rare</button>
-                            <button class="filter-button-rarity mythic" id="mythicFilterBtn"
-                                onclick="filterByRarity('mythic')">Mythic</button>
-                        </div>
-                    </div>
-                    <div id="resetFilterContainer" class="button-group gap-5">
-                        <button class="button secondary-button small-button" onclick="clearFilters()">Clear
-                            Filters</button>
+            <p id="deckControlTitle" class="container-title">Deck Control Panel</p>
+            <div class="container-control-row">
+                <div class="title-row">
+                    <div class="button-group">
+                        <button class="button primary-button container-control-button"
+                            onclick="openCreateDeckModal()">Create Deck</button>
+                        <button id="addCardsToDeckBtn" class="button primary-button container-control-button"
+                            onclick="openAddCardModalWithDestination()">Add Cards</button>
+                        <button class="button secondary-button container-control-button"
+                            onclick="openImportCardsModal()">Import...</button>
+                        <select id="deckSelect" class="text-input length-medium" disabled>
+                            <option value="">Select deck...</option>
+                        </select>
+                        <button id="closeDeckBtn" class="button secondary-button container-control-button"
+                            disabled>Close
+                            Deck</button>
+                        <button id="deleteDeckBtn" class="button secondary-button container-control-button"
+                            disabled>Delete
+                            Deck</button>
                     </div>
                 </div>
             </div>
+        </div>
+        <div id="collectionList" class="display-container full-width has-shadow" style="display: none;">
+            <div class="active-list-view-controls">
+                <div class="left-controls">
+                    <input type="text" id="searchCollectionList" class="text-input bottom-margin-10"
+                        placeholder="Search your cards..." style="display: none;">
+                    <div class="sort-filter-container">
+                        <button id="sortToggleButton" class="button secondary-button small-button"
+                            onclick="toggleSortControls()">Sort</button>
+                        <button id="filterToggleButton" class="button secondary-button small-button"
+                            onclick="toggleFilterControls()">Filter</button>
+                    </div>
+                </div>
+                <div class="right-controls">
+                    <p id="displayCount" style="display: none;">Displaying 0/0 cards</p>
+                </div>
+            </div>
             <p id="noCardsInCollectionText">No cards in collection. Click "Add Cards" to start building!</p>
-            <input type="text" id="searchCollectionList" class="text-input bottom-margin-10"
-                placeholder="Search your collection..." style="display: none;">
-            <p id="displayCount" style="display: none;">Displaying 0/0 cards</p>
+            <div id="sortFilterControlsContainer">
+                <div id="sortControls" class="sort-controls">
+                    <select id="sortCriterion" class="text-input length-medium">
+                        <option value="collector_number" selected>Set Number</option>
+                        <option value="name">Name</option>
+                        <option value="cmc">Mana Cost</option>
+                        <option value="color">Mana Color</option>
+                        <option value="rarity">Rarity</option>
+                    </select>
+                    <select id="sortDirection" class="text-input length-medium">
+                        <option value="asc">Ascending</option>
+                        <option value="desc">Descending</option>
+                    </select>
+                    <button id="resetSortButton" class="button secondary-button small-button">Reset</button>
+                </div>
+                <div id="filterControls" class="filter-controls">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label>Color</label>
+                            <div class="gap-5">
+                                <button class="filter-button color-w" onclick="filterByColor('W')">{W}</button>
+                                <button class="filter-button color-u" onclick="filterByColor('U')">{U}</button>
+                                <button class="filter-button color-b" onclick="filterByColor('B')">{B}</button>
+                                <button class="filter-button color-r" onclick="filterByColor('R')">{R}</button>
+                                <button class="filter-button color-g" onclick="filterByColor('G')">{G}</button>
+                                <button class="filter-button color-colorless"
+                                    onclick="filterByColor('Colorless')">{C}</button>
+                                <button class="filter-button color-multicolor"
+                                    onclick="filterByColor('Multicolor')">Multicolor</button>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label>Mana Cost</label>
+                            <div class="gap-5">
+                                <button class="filter-button" onclick="filterByManaCost(0)">0</button>
+                                <button class="filter-button" onclick="filterByManaCost(1)">1</button>
+                                <button class="filter-button" onclick="filterByManaCost(2)">2</button>
+                                <button class="filter-button" onclick="filterByManaCost(3)">3</button>
+                                <button class="filter-button" onclick="filterByManaCost(4)">4</button>
+                                <button class="filter-button" onclick="filterByManaCost(5)">5</button>
+                                <button class="filter-button" onclick="filterByManaCost(6)">6</button>
+                                <button class="filter-button" onclick="filterByManaCost(7)">7+</button>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label>Rarity</label>
+                            <div class="gap-5">
+                                <button class="filter-button-rarity common" id="commonFilterBtn"
+                                    onclick="filterByRarity('common')">Common</button>
+                                <button class="filter-button-rarity uncommon" id="uncommonFilterBtn"
+                                    onclick="filterByRarity('uncommon')">Uncommon</button>
+                                <button class="filter-button-rarity rare" id="rareFilterBtn"
+                                    onclick="filterByRarity('rare')">Rare</button>
+                                <button class="filter-button-rarity mythic" id="mythicFilterBtn"
+                                    onclick="filterByRarity('mythic')">Mythic</button>
+                            </div>
+                        </div>
+                        <div id="resetFilterContainer" class="button-group gap-5">
+                            <button class="button secondary-button small-button" onclick="clearFilters()">Clear
+                                Filters</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="collectionCardsList" class="card-gallery"></div>
         </div>
     </div>
@@ -189,8 +211,8 @@
                 <option value="Non-Format">Non-Format</option>
             </select>
             <div class="button-group">
-                <button class="button secondary-button medium-button" onclick="closeCreateDeckModal()">Cancel</button>
-                <button class="button primary-button medium-button" onclick="createDeck()">Create</button>
+                <button class="button secondary-button small-button" onclick="closeCreateDeckModal()">Cancel</button>
+                <button class="button primary-button small-button" onclick="createDeck()">Create</button>
             </div>
         </div>
     </div>
@@ -244,10 +266,11 @@
             <textarea id="importCardsText" class="import-textarea"
                 placeholder="Paste your MTG Arena deck export here..."></textarea>
             <div class="button-group">
-                <button class="button secondary-button medium-button" onclick="uploadImportFile()">Upload
+                <button class="button secondary-button small-button" onclick="uploadImportFile()">Upload
                     file...</button>
                 <button class="button secondary-button small-button" onclick="clearImportText()">Clear</button>
-                <button class="button primary-button medium-button" onclick="submitImportCards()">Submit</button>
+                <button id="importCardsSubmitBtn" class="button primary-button small-button">Import Cards</button>
+                <!-- <button class="button primary-button small-button" onclick="submitImportCards()">Submit</button> -->
             </div>
         </div>
     </div>

@@ -42,6 +42,7 @@ const addToDeckModal = document.getElementById('addToDeckModal');
 const deckSearchInput = document.getElementById('deckSearchInput');
 const collectionForDeckList = document.getElementById('collectionForDeckList');
 const deckCardCount = document.getElementById('deckCardCount');
+// const sortFilterControlsContainer = document.getElementById('sortFilterControlsContainer');
 
 // Google Drive API configuration
 const CLIENT_ID = '1082824817658-ana0620kbg7rqa7krvn7nk06qat39k0e.apps.googleusercontent.com';
@@ -310,6 +311,12 @@ function updateUIState() {
         filterToggleButton.style.display = isCollectionActive && hasCards ? 'inline-block' : 'none';
         sortToggleButton.style.display = isCollectionActive && hasCards ? 'inline-block' : 'none';
     }
+
+    // if (!sortControls.classList.contains('visible') && !filterControls.classList.contains('visible')) {
+    //     sortFilterControlsContainer.style.display = 'none';
+    // } else if (sortControls.classList.contains('visible') || filterControls.classList.contains('visible')) {
+    //     sortFilterControlsContainer.style.display = 'flex';
+    // }
 
     createNewCollectionButton.disabled = isCollectionActive;
     loadCollectionButton.disabled = isCollectionActive;
@@ -1504,11 +1511,15 @@ function resetSort() {
 
 // Function to open the import cards modal
 function openImportCardsModal() {
-    importCardsText.value = '';
+    if (currentView === 'collection') {
+        showFeedback('Please select a deck to import cards into.', 'error');
+        return;
+    }
     importCardsModal.style.display = 'flex';
-    setTimeout(() => {
-        importCardsModal.classList.add('active');
-    }, 10);
+    importCardsModal.classList.add('active');
+    importCardsText.value = '';
+    importCardsText.focus();
+    showFeedback('Paste your Arena deck list to import cards.', 'info');
 }
 
 // Function to close the import cards modal
@@ -1621,6 +1632,64 @@ async function processArenaImport(text) {
         console.error('Import collection error:', error);
         showFeedback(error.message || 'Failed to import collection. Invalid format.', 'error');
     }
+}
+
+// Function to parse and import deck text
+function parseAndImportDeckText(deckText) {
+    if (currentView === 'collection') {
+        showFeedback('No deck selected.', 'error');
+        return;
+    }
+
+    const deck = currentCollection.decks[currentView];
+    const lines = deckText.split('\n');
+    const cardEntries = [];
+
+    lines.forEach(line => {
+        const match = line.match(/^(\d+)\s+(.+)/);
+        if (match) {
+            const quantity = parseInt(match[1]);
+            const name = match[2].trim();
+            if (quantity > 0 && name) cardEntries.push({ name, quantity });
+        }
+    });
+
+    let added = 0;
+    const importPromises = cardEntries.map(async entry => {
+        try {
+            const response = await fetch(`https://api.scryfall.com/cards/named?exact=${encodeURIComponent(entry.name)}`);
+            if (response.ok) {
+                const card = await response.json();
+                const existing = deck.cards.find(c => c.cardId === card.id);
+                if (existing) {
+                    existing.quantity += entry.quantity;
+                } else {
+                    deck.cards.push({ cardId: card.id, quantity: entry.quantity, treatment: 'non-foil' });
+                }
+                added++;
+            } else {
+                showFeedback(`Card not found: ${entry.name}`, 'error', true);
+            }
+        } catch (err) {
+            showFeedback(`Error importing: ${entry.name}`, 'error', true);
+        }
+    });
+
+    Promise.all(importPromises).then(() => {
+        updateCollectionList();
+        updateDeckSelectOptions(currentView);
+        updateDeckControlButtons();
+        closeImportCardsModal();
+        showFeedback(`Imported ${added} cards to deck "${deck.name}".`, 'success');
+    });
+}
+
+// Listen for import cards button click
+const importCardsSubmitBtn = document.getElementById('importCardsSubmitBtn');
+if (importCardsSubmitBtn) {
+    importCardsSubmitBtn.addEventListener('click', () => {
+        parseAndImportDeckText(importCardsText.value);
+    });
 }
 
 // Initialize UI and filter icons
