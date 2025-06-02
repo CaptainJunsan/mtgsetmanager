@@ -19,7 +19,9 @@ const createNewCollectionButton = document.getElementById('createNewCollectionBu
 const loadCollectionButton = document.getElementById('loadCollectionButton');
 const searchCollectionList = document.getElementById('searchCollectionList');
 const cardDetailsModal = document.getElementById('cardDetailsModal');
+const sortToggleButton = document.getElementById('sortToggleButton');
 const filterToggleButton = document.getElementById('filterToggleButton');
+const sortControls = document.getElementById('sortControls');
 const filterControls = document.getElementById('filterControls');
 const fileInput = document.getElementById('fileInput');
 const referencesModal = document.getElementById('referencesModal');
@@ -306,10 +308,9 @@ function updateUIState() {
     if (sortControls) {
         sortControls.style.display = isCollectionActive && hasCards ? 'flex' : 'none';
     }
-    const filterToggleButton = document.getElementById('filterToggleButton');
     if (filterToggleButton) {
-        filterToggleButton.style.display = isCollectionActive && hasCards ? 'inline-block' : 'none';
-        sortToggleButton.style.display = isCollectionActive && hasCards ? 'inline-block' : 'none';
+        filterToggleButton.style.display = isCollectionActive && hasCards ? 'flex' : 'none';
+        sortToggleButton.style.display = isCollectionActive && hasCards ? 'flex' : 'none';
     }
 
     // if (!sortControls.classList.contains('visible') && !filterControls.classList.contains('visible')) {
@@ -340,9 +341,7 @@ setInterval(checkForBackup, 60 * 1000);
 
 // Toggle sort controls
 function toggleSortControls() {
-    const sortControls = document.getElementById('sortControls');
     sortControls.classList.toggle('visible');
-    const sortToggleButton = document.getElementById('sortToggleButton');
     sortToggleButton.setAttribute('aria-expanded', sortControls.classList.contains('visible'));
 }
 
