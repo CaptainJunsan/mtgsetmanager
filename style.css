@@ -19,6 +19,8 @@
     font-family: 'Alegreya', Arial, sans-serif;
     font-weight: 400;
     cursor: text;
+    -webkit-appearance: none; /* Remove default webkit browser styling */
+    -moz-appearance: none; /* Remove default Firefox browser styling */
 }
 
 .text-input.quantity {
@@ -52,14 +54,6 @@
     display: inline-block;
 }
 
-.button:disabled {
-    background: #666 !important;
-    border: none;
-    box-shadow: inset 0 0 5px #ffffff88;
-    color: #ffffff7a;
-    cursor: not-allowed;
-}
-
 .primary-button {
     background: linear-gradient(135deg, #ec7615, #ec5915, #c03b13);
     box-shadow: inset 0 0 5px #ffd45d88;
@@ -68,8 +62,16 @@
     transition: 300ms;
 }
 
-.primary-button:hover {
+.primary-button:hover:not(:disabled) {
     box-shadow: inset 0 0 9px #ffd45d;
+}
+
+.primary-button:disabled {
+    background: #666 !important;
+    border: none;
+    box-shadow: inset 0 0 5px #ffffff88;
+    color: #ffffff7a;
+    cursor: not-allowed;
 }
 
 .secondary-button {
@@ -79,8 +81,14 @@
     transition: 300ms;
 }
 
-.secondary-button:hover {
+.secondary-button:hover:not(:disabled) {
     box-shadow: inset 0 0 5px #ffffff88;
+}
+
+.secondary-button:disabled {
+    border-color: #333 !important;
+    color: #333;
+    cursor: not-allowed;
 }
 
 .medium-button {
@@ -107,7 +115,6 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    position: sticky;
 }
 
 .left-controls {
@@ -1280,7 +1287,7 @@ p {
 }
 
 #sortFilterControlsContainer {
-    height: 110px;
+    height: auto;
 }
 
 .filter-controls {
@@ -1970,6 +1977,42 @@ body *::-webkit-scrollbar {
     .container-control-row .text-input {
         width: 100%;
         max-width: none;
+    }
+
+
+
+    .active-list-view-controls {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .left-controls {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+    }
+    .sort-filter-container {
+        width: 100%;
+    }
+
+    #sortToggleButton, #filterToggleButton {
+        width: 100%;
+        max-width: none;
+    }
+
+    .right-controls {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
     }
 }
 
