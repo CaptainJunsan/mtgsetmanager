@@ -1,6 +1,7 @@
 // DOM elements
 const emptySplash = document.getElementById('emptyPage');
 const createCollectionForm = document.getElementById('createCollectionForm');
+const createCollectionFormButton = document.getElementById('createCollectionFormButton');
 const collectionInfoBlock = document.getElementById('collectionInfo');
 const collectionNameInput = document.getElementById('collectionName');
 const collectionFormatSelect = document.getElementById('collectionFormat');
@@ -787,7 +788,7 @@ function closeAddCardModal() {
 function clearSearchInput() {
     searchInput.value = '';
     searchResults.innerHTML = '';
-    document.getElementById('clearSearchBtn').style.display = 'none';
+    // document.getElementById('clearSearchBtn').style.display = 'none';
     searchInput.focus();
 }
 
@@ -818,7 +819,7 @@ function openCardDetailsModal(card, treatment, fromSearch = false) {
             <div class="card-details-content">
                 <h3>${card.name}</h3>
                 <p class="mana-text">${replaceManaSymbols(card.mana_cost || '')}</p>
-                <p class="type-line">${card.type_line || 'Unknown'}</p>
+                <h4 class="type-line">${card.type_line || 'Unknown'}</h4>
                 ${card.power && card.toughness ? `<p>${card.power}/${card.toughness}</p>` : ''}
                 <p class="mana-text">${replaceManaSymbols(card.oracle_text || '')}</p>
                 ${fromSearch && isCollectionActive ?
@@ -925,9 +926,12 @@ function displaySearchResults(cards) {
         const nonFoilCount = isCollectionActive ? currentCollection.cards.filter(c => c.card.id === card.id && c.treatment === 'non-foil').reduce((sum, c) => sum + c.quantity, 0) : 0;
         const showCountText = isCollectionActive && (foilCount > 0 || nonFoilCount > 0);
         div.innerHTML = `
-            <div class="content">
+            ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" id="img-${card.id}" style="cursor: pointer;">` : '<p>No image available</p>'}
+            <div class="result-content">
                 <span class="card-name">${card.name}</span>
-                <div class="type-line">${card.type_line} - ${card.rarity ? card.rarity.charAt(0).toUpperCase() + card.rarity.slice(1) : 'Unknown'}</div>
+                <div class="type-line-container"><h4 class="search-result-type-line">${card.type_line} - ${card.rarity ? card.rarity.charAt(0).toUpperCase() + card.rarity.slice(1) : 'Unknown'}</h4></div>
+                <div class="result-list-mana-text-container"><p class="result-list-mana-text">${replaceManaSymbols(card.mana_cost || '')}</p></div>
+                <div class="more-info-text-container"><p class="results-more-info-text">Click the card image for details.</p></div>
                 ${isCollectionActive ? `
                     <div class="inputs">
                         <input type="number" class="text-input quantity" min="1" max="4" value="1" id="qty-${card.id}">
@@ -949,7 +953,6 @@ function displaySearchResults(cards) {
                     </div>
                 ` : ''}
             </div>
-            ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" id="img-${card.id}" style="cursor: pointer;">` : '<p>No image available</p>'}
         `;
         searchResults.appendChild(div);
         if (isCollectionActive && hasDecks) {
@@ -1122,7 +1125,7 @@ async function updateCollectionList() {
 
     // Update counts
     const totalCards = cardsToDisplay.reduce((sum, c) => sum + c.quantity, 0);
-    collectionCardCount.innerText = `Total Cards: ${totalCards}`;
+    collectionCardCount.innerText = `Collection cards: ${totalCards}`;
     collectionCardCount.classList.add('updated');
     setTimeout(() => collectionCardCount.classList.remove('updated'), 200);
     updateDisplayCount();
@@ -1620,31 +1623,6 @@ async function processArenaImport(text) {
     }
 }
 
-// Switch CSS file
-function changeCSS(file) {
-    let link = document.querySelector('link[rel="stylesheet"] [href*="style"]') || document.createElement('link');
-
-    link.rel = 'stylesheet';
-    link.href = file;
-
-    if (!link.parentNode) {
-        document.head.appendChild(link);
-    }
-}
-
-function switchStyle(){
-    // Add conditional logic to determine current stylesheet and switch to alternate
-    const currentStylesheet = document.querySelector('link[rel="stylesheet"]').href;
-    console.log('Current stylesheet:', currentStylesheet);
-    if (currentStylesheet.includes('style.css')) {
-        console.log('Switching to alternate style.css');
-        changeCSS('style-alt-1.css');
-    } else if (currentStylesheet.includes('style-alt-1.css')) {
-        console.log('Switching to original style.css');
-        changeCSS('style.css');
-    }
-}
-
 // Initialize UI and filter icons
 document.addEventListener('DOMContentLoaded', () => {
     const closeDeckBtn = document.getElementById('closeDeckBtn');
@@ -1669,6 +1647,11 @@ document.addEventListener('DOMContentLoaded', () => {
     createNewCollectionButton.addEventListener('click', createNewCollection);
     loadCollectionButton.addEventListener('click', loadCollection);
     quickCardSearchButton.addEventListener('click', openAddCardModal);
+
+    collectionNameInput.addEventListener('input', () => {
+        createCollectionFormButton.disabled = collectionNameInput.value === "" ? true : false;
+    });
+
     sortCriterionSelect.addEventListener('change', () => {
         currentSort.criterion = sortCriterionSelect.value;
         updateCollectionList();

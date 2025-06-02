@@ -13,8 +13,8 @@
 <body>
     <header id="mainHeader">
         <div class="header-left">
-            <img src="favicon.png" alt="logo" id="headerLogo">
-            <h5>Mr. Bojangles' Collection Manager</h5>
+            <!-- <img src="favicon.png" alt="logo" id="headerLogo"> -->
+            <h5 id="appTitle">Mr. Bojangles' Collection Manager</h5>
         </div>
         <div id="quickLookupContainer">
             <button id="quickCardSearchButton" class="text-input">Search all
@@ -28,7 +28,7 @@
     </header>
     <div id="pageContent">
         <div id="emptyPage" class="display-container full-width has-shadow">
-            <h3>Welcome to your Collection Manager</h3>
+            <h2 class="title">Welcome to your Collection Manager</h2>
             <p>Create a new collection or load an existing one to start managing your Magic: The Gathering collection.
             </p>
         </div>
@@ -43,40 +43,39 @@
                 <option value="Commander">Commander</option>
                 <option value="Modern">Modern</option>
             </select> -->
-            <div class="button-group gap-5">
-                <button class="button primary-button medium-button" onclick="createCollection()">Create
-                    Collection</button>
+            <div class="button-group">
+                <button id="createCollectionFormButton" class="button primary-button medium-button" onclick="createCollection()" disabled>Create</button>
                 <button class="button secondary-button medium-button" onclick="updateUIState()">Cancel</button>
             </div>
         </div>
         <div id="collectionInfo" class="display-container full-width" style="display: none;">
-            <h3 id="collectionNameDisplay">Collection: Unnamed</h3>
-            <p id="collectionDescriptionDisplay" style="display: none;"></p>
-            <button id="editCollectionBtn" class="secondary-button small-button"
-                onclick="openEditCollectionModal()">Edit collection details</button>
+            <div class="title-row">
+                <h3 id="collectionNameDisplay">Collection: Unnamed</h3>
+                <p id="collectionDescriptionDisplay" style="display: none;"></p>
+                <a id="editCollectionInfoLink" class="text-link" onclick="openEditCollectionModal()">Edit</a>
+            </div>
             <br>
-            <p id="collectionCardCount">Total Cards: 0</p>
             <div class="button-group">
-                <button class="button primary-button medium-button" onclick="openAddCardModal()">Add Cards</button>
-                <button class="button secondary-button medium-button" onclick="saveCollection()">Save
+                <button class="button primary-button small-button" onclick="openAddCardModal()">Add Cards</button>
+                <button class="button secondary-button small-button" onclick="saveCollection()">Save
                     Collection</button>
-                <button class="button secondary-button medium-button" onclick="openImportCardsModal()">Import Cards from
-                    MTG Arena...</button>
-                <button class="button secondary-button medium-button" onclick="unloadCollection()">Unload
+                <button class="button secondary-button small-button" onclick="openImportCardsModal()">Import...</button>
+                <button class="button secondary-button small-button" onclick="unloadCollection()">Unload
                     Collection</button>
             </div>
+            <p id="collectionCardCount">Collection cards: 0</p>
         </div>
         <div id="deckControlPanel" class="display-container full-width" style="display: none;">
             <h3 id="deckControlTitle">Deck Control Panel</h3>
             <div class="button-group">
-                <button class="button primary-button medium-button" onclick="openCreateDeckModal()">Create Deck</button>
-                <button id="addCardsToDeckBtn" class="button primary-button medium-button"
+                <button class="button primary-button small-button" onclick="openCreateDeckModal()">Create Deck</button>
+                <button id="addCardsToDeckBtn" class="button primary-button small-button"
                     onclick="openAddCardModalWithDestination()">Add Cards</button>
                 <select id="deckSelect" class="text-input length-medium" disabled>
                     <option value="">Select deck...</option>
                 </select>
-                <button id="closeDeckBtn" class="button secondary-button medium-button" disabled>Close Deck</button>
-                <button id="deleteDeckBtn" class="button secondary-button medium-button" disabled>Delete Deck</button>
+                <button id="closeDeckBtn" class="button secondary-button small-button" disabled>Close Deck</button>
+                <button id="deleteDeckBtn" class="button secondary-button small-button" disabled>Delete Deck</button>
             </div>
         </div>
         <div id="collectionList" class="display-container full-width has-shadow" style="display: none;">
@@ -158,7 +157,11 @@
     </div>
     <div id="editCollectionModal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeEditCollectionModal()">×</span>
+            <span class="svg-close-button" onclick="closeEditCollectionModal()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M6 18L18 6" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </span>
             <h3>Edit collection details</h3>
             <input type="text" id="editCollectionName" class="text-input" placeholder="Collection Name">
             <textarea id="editCollectionDescription" class="text-input" placeholder="Description (optional)"></textarea>
@@ -170,7 +173,11 @@
     </div>
     <div id="createDeckModal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeCreateDeckModal()">&times;</span>
+            <span class="svg-close-button" onclick="closeCreateDeckModal()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M6 18L18 6" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </span>
             <h3>Create deck</h3>
             <input type="text" id="deckName" class="text-input" placeholder="Deck Name" required>
             <label for="deckFormat">Select Format</label>
@@ -183,13 +190,17 @@
             </select>
             <div class="button-group">
                 <button class="button secondary-button medium-button" onclick="closeCreateDeckModal()">Cancel</button>
-                <button class="button primary-button medium-button" onclick="createDeck()">Create deck</button>
+                <button class="button primary-button medium-button" onclick="createDeck()">Create</button>
             </div>
         </div>
     </div>
     <div id="addToDeckModal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeAddToDeckModal()">×</span>
+            <span class="svg-close-button" onclick="closeAddToDeckModal()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M6 18L18 6" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </span>
             <h3>Add cards from your collection to your deck</h3>
             <input type="text" id="deckSearchInput" class="text-input length-max"
                 placeholder="Search your collection...">
@@ -211,7 +222,10 @@
             <h2 id="addCardModalTitle">Add Card</h2>
             <div class="text-with-close-x"><input type="text" id="searchInput" class="text-input"
                     placeholder="Search for a card..." maxlength="100">
-                <span id="clearSearchBtn" class="clear-search" onclick="clearSearchInput()">×</span>
+                <span id="clearSearchBtn" class="clear-search" onclick="clearSearchInput()"><svg width="12" height="12"
+                        viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 6L18 18M6 18L18 6" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" />
+                    </svg></span>
             </div>
             <div id="searchResults"></div>
         </div>
@@ -219,7 +233,11 @@
     <div id="cardDetailsModal" class="card-details-modal"></div>
     <div id="importCardsModal" class="modal" style="display: none;">
         <div class="modal-content">
-            <span class="close-button" onclick="closeImportCardsModal()">×</span>
+            <span class="svg-close-button" onclick="closeImportCardsModal()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M6 18L18 6" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </span>
             <h3>Import Cards from MTG Arena</h3>
             <p>Paste your copied MTG Arena deck export in the text box below, or click the button to import a .txt file.
             </p>
@@ -243,12 +261,12 @@
     </div>
     <div id="referencesModal" class="references-modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeReferencesModal()">×</span>
-            <h1>References</h1>
+            <h2 class="title">References</h2>
             <p>Our card indexing system runs by using the Scryfall database. This means that Scryfall's powerful <a
                     href="https://scryfall.com/docs/syntax" target="_blank">syntax system</a> also works when searching
                 from our tool.</p>
-            <p>We use the Andrew Gioia Mana Font to display high quality and accurate MTG card symbols in our search results and card previews.</p>
+            <p>We use the Andrew Gioia Mana Font to display high quality and accurate MTG card symbols in our search
+                results and card previews.</p>
             <h3>Reference links:</h3>
             <ul>
                 <li><a href="https://scryfall.com/" target="_blank">Scryfall</a> - Card search and images</li>
@@ -260,8 +278,7 @@
         </div>
     </div>
     <footer>
-        <p>Collection Manager v1.3.0 © Mr. Bojangles 2025 | <a onclick="openReferencesModal()">References</a> | <a
-                onclick="switchStyle()">Switch Styling</a></p>
+        <p>Collection Manager v1.3.0 © Mr. Bojangles 2025 | <a onclick="openReferencesModal()">References</a></p>
     </footer>
     <input type="file" id="fileInput" style="display: none;">
     <script src="script.js"></script>

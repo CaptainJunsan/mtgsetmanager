@@ -1686,6 +1686,7 @@ body *::-webkit-scrollbar {
     position: relative;
     margin-top: 11px;
     right: 25px;
+    cursor: pointer;
 }
 
 @media (max-width: 768px) {
