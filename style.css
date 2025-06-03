@@ -18,6 +18,7 @@
     color: #e0e0e0;
     font-family: 'Alegreya', serif;
     font-weight: 400;
+    appearance: none;
     -webkit-appearance: none;
     /* Remove default webkit browser styling */
     -moz-appearance: none;
