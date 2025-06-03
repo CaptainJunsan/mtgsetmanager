@@ -21,9 +21,9 @@
                 cards...</button>
         </div>
         <div id="menuBar">
-            <button id="createNewCollectionButton" class="button primary-button medium-button">Create New
+            <button id="createNewCollectionButton" class="button primary-button small-button">New
                 Collection</button>
-            <button id="loadCollectionButton" class="button secondary-button medium-button">Load Collection</button>
+            <button id="loadCollectionButton" class="button secondary-button small-button">Load...</button>
         </div>
     </header>
     <div id="pageContent">
@@ -44,9 +44,9 @@
                 <option value="Modern">Modern</option>
             </select> -->
             <div class="button-group">
+                <button class="button secondary-button small-button" onclick="updateUIState()">Cancel</button>
                 <button id="createCollectionFormButton" class="button primary-button small-button"
                     onclick="createCollection()" disabled>Create</button>
-                <button class="button secondary-button small-button" onclick="updateUIState()">Cancel</button>
             </div>
         </div>
         <div id="collectionInfo" class="display-container full-width" style="display: none;">
@@ -58,11 +58,11 @@
                     <a id="editCollectionInfoLink" class="text-link" onclick="openEditCollectionModal()">Edit</a>
                 </div>
                 <div class="button-group">
-                    <button class="button primary-button container-control-button" onclick="openAddCardModal()">Add
-                        Cards</button>
-                    <button class="button secondary-button container-control-button" onclick="saveCollection()">Save
+                    <!-- <button class="button primary-button small-button" onclick="openAddCardModal()">Add
+                        Cards</button> -->
+                    <button class="button secondary-button no-class small-button" onclick="saveCollection()">Save
                         Collection</button>
-                    <button class="button secondary-button container-control-button" onclick="unloadCollection()">Unload
+                    <button class="button secondary-button no-class small-button" onclick="unloadCollection()">Unload
                         Collection</button>
                 </div>
             </div>
@@ -73,19 +73,19 @@
             <div class="container-control-row">
                 <div class="title-row">
                     <div class="button-group">
-                        <button class="button primary-button container-control-button"
+                        <button class="button primary-button no-class small-button"
                             onclick="openCreateDeckModal()">Create Deck</button>
-                        <button id="addCardsToDeckBtn" class="button primary-button container-control-button"
+                        <button id="addCardsToDeckBtn" class="button secondary-button no-class small-button"
                             onclick="openAddCardModalWithDestination()">Add Cards</button>
-                        <button class="button secondary-button container-control-button"
+                        <button id="importCardsToDeckBtn" class="button secondary-button no-class small-button"
                             onclick="openImportCardsModal()">Import...</button>
                         <select id="deckSelect" class="text-input length-medium" disabled>
-                            <option value="">Select deck...</option>
+                            <option id="deckSelectDefaultOption" value="" selected disabled>Select deck...</option>
                         </select>
-                        <button id="closeDeckBtn" class="button secondary-button container-control-button"
+                        <button id="closeDeckBtn" class="button secondary-button no-class small-button"
                             disabled>Close
                             Deck</button>
-                        <button id="deleteDeckBtn" class="button secondary-button container-control-button"
+                        <button id="deleteDeckBtn" class="button secondary-button no-class small-button"
                             disabled>Delete
                             Deck</button>
                     </div>
@@ -96,7 +96,7 @@
             <div class="active-list-view-controls">
                 <div class="left-controls">
                     <input type="text" id="searchCollectionList" class="text-input bottom-margin-10"
-                        placeholder="Search your cards..." style="display: none;">
+                        placeholder="Search your collection..." style="display: none;">
                     <div class="sort-filter-container">
                         <button id="sortToggleButton" class="button secondary-button small-button"
                             onclick="toggleSortControls()">Sort</button>
@@ -188,8 +188,8 @@
             <input type="text" id="editCollectionName" class="text-input" placeholder="Collection Name">
             <textarea id="editCollectionDescription" class="text-input" placeholder="Description (optional)"></textarea>
             <div class="button-group">
-                <button class="secondary-button medium-button" onclick="closeEditCollectionModal()">Cancel</button>
-                <button class="primary-button medium-button" onclick="saveCollectionDetails()">Save changes</button>
+                <button class="button secondary-button small-button" onclick="closeEditCollectionModal()">Cancel</button>
+                <button class="button primary-button small-button" onclick="saveCollectionDetails()">Save changes</button>
             </div>
         </div>
     </div>

@@ -39,11 +39,18 @@ const loadCollectionModal = document.getElementById('loadCollectionModal');
 const loadFromGoogleDriveBtn = document.getElementById('loadFromGoogleDriveBtn');
 const uploadFromDeviceBtn = document.getElementById('uploadFromDeviceBtn');
 const createDeckModal = document.getElementById('createDeckModal');
+const deckName = document.getElementById('deckName');
 const deckControlPanel = document.getElementById('deckControlPanel');
 const addToDeckModal = document.getElementById('addToDeckModal');
 const deckSearchInput = document.getElementById('deckSearchInput');
 const collectionForDeckList = document.getElementById('collectionForDeckList');
 const deckCardCount = document.getElementById('deckCardCount');
+const closeDeckBtn = document.getElementById('closeDeckBtn');
+const deleteDeckBtn = document.getElementById('deleteDeckBtn');
+const deckSelect = document.getElementById('deckSelect');
+const deckSelectDefaultOption = document.getElementById('deckSelectDefaultOption');
+const addCardsToDeckBtn = document.getElementById('addCardsToDeckBtn');
+const importCardsToDeckBtn = document.getElementById('importCardsToDeckBtn');
 // const sortFilterControlsContainer = document.getElementById('sortFilterControlsContainer');
 
 // Google Drive API configuration
@@ -303,6 +310,15 @@ function updateUIState() {
     filterControls.style.display = isCollectionActive && hasCards ? 'flex' : 'none';
     displayCount.style.display = isCollectionActive && hasCards ? 'block' : 'none';
     deckControlPanel.style.display = isCollectionActive ? 'flex' : 'none';
+    quickCardSearchButton.innerHTML = isCollectionActive ? 'Search to add cards...' : 'Search any card in Magic...';
+
+    if (isCollectionActive) {
+        quickCardSearchButton.innerHTML = 'Search to add cards...';
+        quickCardSearchButton.style.border = '2px solid #ec5915';
+    } else {
+        quickCardSearchButton.innerHTML = 'Search any card in Magic...';
+        quickCardSearchButton.style.border = '';
+    }
 
     const sortControls = document.querySelector('.sort-controls');
     if (sortControls) {
@@ -321,8 +337,8 @@ function updateUIState() {
 
     createNewCollectionButton.disabled = isCollectionActive;
     loadCollectionButton.disabled = isCollectionActive;
-    createNewCollectionButton.style.opacity = isCollectionActive ? '0.5' : '1';
-    loadCollectionButton.style.opacity = isCollectionActive ? '0.5' : '1';
+    // createNewCollectionButton.style.opacity = isCollectionActive ? '0.5' : '1';
+    // loadCollectionButton.style.opacity = isCollectionActive ? '0.5' : '1';
 
     if (isCollectionActive) {
         collectionNameDisplay.innerText = `${currentCollection.name}`;
@@ -481,6 +497,7 @@ function openCreateDeckModal() {
     console.log('Opening Create Deck modal');
     createDeckModal.style.display = 'flex';
     createDeckModal.classList.add('active');
+    deckName.focus();
 }
 
 // Close the Create Deck Modal
@@ -526,8 +543,7 @@ function createDeck() {
 
 // Update Deck Select Options
 function updateDeckSelectOptions(selectedIndex = null) {
-    const deckSelect = document.getElementById('deckSelect');
-    deckSelect.innerHTML = '<option value="">Select deck...</option>';
+    deckSelectDefaultOption.text = 'Select deck...';
     currentCollection.decks.forEach((deck, index) => {
         const option = document.createElement('option');
         option.value = index;
@@ -535,6 +551,8 @@ function updateDeckSelectOptions(selectedIndex = null) {
         deckSelect.appendChild(option);
     });
     if (selectedIndex !== null) {
+        deckSelectDefaultOption.selected = false;
+        deckSelectDefaultOption.text = 'Close deck to view collection';
         deckSelect.value = selectedIndex;
     }
     deckSelect.disabled = currentCollection.decks.length === 0;
@@ -560,7 +578,8 @@ function closeDeck() {
         return;
     }
     currentView = 'collection';
-    document.getElementById('deckSelect').value = ''; // Reset to "Select deck..."
+    deckSelectDefaultOption.selected = true; // Reset to default option
+    deckSelectDefaultOption.text = 'Select deck...';; // Reset to "Select deck..."
     updateCollectionList();                           // Show all collection cards
     updateDeckControlButtons();                       // Disable buttons
     showFeedback('Closed deck. Viewing collection.', 'info');
@@ -578,7 +597,8 @@ function deleteDeck() {
         currentCollection.decks.splice(deckIndex, 1);
         currentView = 'collection';
         updateDeckSelectOptions();                    // Refresh menu
-        document.getElementById('deckSelect').value = ''; // Reset to "Select deck..."
+        deckSelectDefaultOption.selected = true; // Reset to default option
+        deckSelectDefaultOption.text = 'Select deck...'; // Reset to "Select deck..."
         updateCollectionList();                       // Show all collection cards
         updateDeckControlButtons();                   // Disable buttons
         showFeedback(`Deck "${deckName}" deleted.`, 'success');
@@ -587,11 +607,13 @@ function deleteDeck() {
 
 // Update Deck Control Buttons
 function updateDeckControlButtons() {
-    const closeDeckBtn = document.getElementById('closeDeckBtn');
-    const deleteDeckBtn = document.getElementById('deleteDeckBtn');
     const isDeckSelected = currentView !== 'collection';
     closeDeckBtn.disabled = !isDeckSelected;
     deleteDeckBtn.disabled = !isDeckSelected;
+    // deckSelect.style.cursor = !isDeckSelected ? 'not-allowed' : 'pointer';
+    deckSelect.style.opacity = !isDeckSelected ? '0.5' : '1';
+    addCardsToDeckBtn.disabled = !isDeckSelected;
+    importCardsToDeckBtn.disabled = !isDeckSelected;
 }
 
 // Close the Edit Collection Modal
@@ -940,11 +962,13 @@ function displaySearchResults(cards) {
                 <div class="more-info-text-container"><p class="results-more-info-text">Click the card image for details.</p></div>
                 ${isCollectionActive ? `
                     <div class="inputs">
-                        <input type="number" class="text-input quantity" min="1" max="4" value="1" id="qty-${card.id}">
-                        <select class="text-input-dropdown" id="treatment-${card.id}" onchange="updateSearchResultFoil(this, '${card.id}')">
-                            <option value="non-foil">Non-foil</option>
-                            <option value="foil">Foil</option>
-                        </select>
+                        <div class="qty-and-treatment">
+                            <input type="number" class="text-input quantity" min="1" max="4" value="1" id="qty-${card.id}">
+                            <select class="text-input text-input-dropdown" id="treatment-${card.id}" onchange="updateSearchResultFoil(this, '${card.id}')">
+                                <option value="non-foil">Non-foil</option>
+                                <option value="foil">Foil</option>
+                            </select>
+                        </div>
                         ${hasDecks ? `
                             <select class="text-input-dropdown" id="deck-${card.id}">
                                 <option value="">Select Destination</option>
@@ -953,7 +977,7 @@ function displaySearchResults(cards) {
                             </select>
                         ` : ''}
                         <div class="add-button-container">
-                            <button class="button primary-button medium-button" onclick="addToCollectionOrDeck('${card.id}')">Add</button>
+                            <button class="button primary-button small-button" onclick="addToCollectionOrDeck('${card.id}')">Add card</button>
                             ${showCountText ? `<span class="card-collection-count">★ ${foilCount} | ${nonFoilCount}</span>` : ''}
                         </div>
                     </div>
