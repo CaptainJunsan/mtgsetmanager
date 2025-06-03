@@ -870,12 +870,12 @@ function openCardDetailsModal(card, treatment, fromSearch = false) {
                         <label for="removeQty-${card.id}">Remove: </label>
                         <input type="number" id="removeQty-${card.id}" class="text-input quantity" min="1" max="${cardCount}" value="1" style="width: 50px; margin-right: 10px;">
                         ${hasDecks ? `
-                            <select id="source-${card.id}" class="text-input-dropdown" style="width: 150px; margin-right: 10px;">
+                            <select id="source-${card.id}" class="text-input text-input-dropdown" style="width: 150px; margin-right: 10px;">
                                 <option value="collection">Collection</option>
                                 ${currentCollection.decks.map((deck, index) => `<option value="${index}">${deck.name}</option>`).join('')}
                             </select>
                         ` : ''}
-                        <button class="button secondary-button medium-button" onclick="removeFromCollection('${card.id}', '${treatment}', document.getElementById('source-${card.id}')?.value || 'collection')">Remove</button>
+                        <button class="button secondary-button small-button" onclick="removeFromCollection('${card.id}', '${treatment}', document.getElementById('source-${card.id}')?.value || 'collection')">Remove</button>
                     </div>` : ''}
             </div>
         `;
@@ -1277,9 +1277,19 @@ function removeFromCollection(cardId, treatment, source = 'collection') {
     if (cardEntry.quantity <= removeQty) {
         if (source === 'collection') {
             currentCollection.cards = currentCollection.cards.filter(c => !(c.card.id === cardId && c.treatment === treatment));
-            // Remove from all decks
+
+            // Adjust each deck that includes this card
+            let remainingToRemove = removeQty;
             currentCollection.decks.forEach(deck => {
-                deck.cards = deck.cards.filter(c => !(c.cardId === cardId && c.treatment === treatment));
+                const deckCard = deck.cards.find(c => c.cardId === cardId && c.treatment === treatment);
+                if (deckCard && remainingToRemove > 0) {
+                    const toSubtract = Math.min(deckCard.quantity, remainingToRemove);
+                    deckCard.quantity -= toSubtract;
+                    remainingToRemove -= toSubtract;
+                    if (deckCard.quantity <= 0) {
+                        deck.cards = deck.cards.filter(c => !(c.cardId === cardId && c.treatment === treatment));
+                    }
+                }
             });
         } else {
             targetCards = targetCards.filter(c => !(c.cardId === cardId && c.treatment === treatment));
