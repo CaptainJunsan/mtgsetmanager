@@ -3,12 +3,7 @@ This project is designed to help users create collection JSON files of their Mag
 Current stable version: v1.4.12
 
 **HOW TO USE:**
-1. Create a new collection
-2. Give that collection a unique name and description
-3. Start by adding cards using the "Add card" button
-4. Search for cards, preview them by clicking on the card image, and select how many copies of which treatment (non-foil or foil) you want to add
-5. Remember to export/save your collection, which will download a JSON file with your collection details
-6. You can come back to your colelction by clicking "Load collection" from the nav bar and uploading your downlaoded JSON file to make more changes, add or remove cards, etc.
+Please see in the app at the bottom (in the footer). CLick the "Need help?" link to learn more about the platform.
 
 **ROADMAP:**
 1. Create collection feature - done
