@@ -51,6 +51,7 @@ const deckSelect = document.getElementById('deckSelect');
 const deckSelectDefaultOption = document.getElementById('deckSelectDefaultOption');
 const addCardsToDeckBtn = document.getElementById('addCardsToDeckBtn');
 const importCardsToDeckBtn = document.getElementById('importCardsToDeckBtn');
+const helpCentreModal = document.getElementById('helpCentreModal');
 // const sortFilterControlsContainer = document.getElementById('sortFilterControlsContainer');
 
 // Google Drive API configuration
@@ -305,7 +306,7 @@ function updateUIState() {
     createCollectionForm.style.display = isCreatingCollection ? 'flex' : 'none';
     collectionInfoBlock.style.display = isCollectionActive ? 'flex' : 'none';
     collectionList.style.display = isCollectionActive ? 'flex' : 'none';
-    noCardsInCollectionText.style.display = isCollectionActive && !hasCards ? 'block' : 'none';
+    noCardsInCollectionText.style.display = isCollectionActive && !hasCards ? 'flex' : 'none';
     searchCollectionList.style.display = isCollectionActive && hasCards ? 'block' : 'none';
     filterControls.style.display = isCollectionActive && hasCards ? 'flex' : 'none';
     displayCount.style.display = isCollectionActive && hasCards ? 'block' : 'none';
@@ -383,6 +384,17 @@ function openReferencesModal() {
 function closeReferencesModal() {
     referencesModal.classList.remove('active');
     referencesModal.style.display = 'none';
+}
+
+// Help Centre modal handlers
+function openHelpCentreModal() {
+    helpCentreModal.style.display = 'flex';
+    helpCentreModal.classList.add('active');
+}
+
+function closeHelpCentreModal() {
+    helpCentreModal.classList.remove('active');
+    helpCentreModal.style.display = 'none';
 }
 
 function openLoadCollectionModal(event) {

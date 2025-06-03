@@ -16,11 +16,12 @@
     width: 100%;
     background: #0a0a0a;
     color: #e0e0e0;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-weight: 400;
-    cursor: text;
-    -webkit-appearance: none; /* Remove default webkit browser styling */
-    -moz-appearance: none; /* Remove default Firefox browser styling */
+    -webkit-appearance: none;
+    /* Remove default webkit browser styling */
+    -moz-appearance: none;
+    /* Remove default Firefox browser styling */
 }
 
 .text-input.quantity {
@@ -474,7 +475,7 @@ body {
     color: #e0e0e0;
     padding-bottom: 5px;
 
-    flex-grow: 1;
+    /* flex-grow: 1; */
     border-bottom: 1px solid #333;
 }
 
@@ -521,7 +522,7 @@ footer {
 footer a {
     color: #ec5915;
     cursor: pointer;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-weight: 400;
     text-decoration: none;
 }
@@ -537,12 +538,12 @@ h3 {
 }
 
 p {
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-weight: 400;
 }
 
 #collectionCardCount {
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-weight: 400;
     color: #e0e0e0;
     transition: transform 300ms ease-in-out;
@@ -553,7 +554,7 @@ p {
 }
 
 #displayCount {
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-weight: 400;
     color: #e0e0e0;
     text-align: center;
@@ -857,7 +858,7 @@ p {
 .card-details-modal .card-details-content {
     text-align: center;
     color: #e0e0e0;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-weight: 400;
     width: 100%;
 }
@@ -993,7 +994,7 @@ p {
     flex-direction: column;
     align-items: center;
     color: #e0e0e0;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-weight: 400;
     opacity: 0;
     transition: opacity 300ms ease-in-out;
@@ -1028,7 +1029,7 @@ p {
     color: #c03b13;
 }
 
-.references-modal .close-button {
+/* .references-modal .close-button {
     position: absolute;
     width: 32px;
     height: 32px;
@@ -1039,9 +1040,107 @@ p {
     font-size: 24px;
     cursor: pointer;
     color: #e0e0e0;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-weight: 400;
+} */
+
+#helpCentreModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
 }
+
+#helpCentreModal .modal-content {
+    background: #0f0f0f;
+    border-radius: 10px;
+    padding: 20px;
+    width: 95vw;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #e0e0e0;
+    font-family: 'Alegreya', serif;
+    font-weight: 400;
+    opacity: 0;
+    transition: opacity 300ms ease-in-out;
+}
+
+#helpCentreModal.active .modal-content {
+    opacity: 1;
+}
+
+#helpCentreModal .modal-content h3 {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+#helpCentreModal .modal-content ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin-bottom: 20px;
+}
+
+#helpCentreModal .modal-content li {
+    margin-bottom: 10px;
+}
+
+#helpCentreModal .modal-content a {
+    color: #ec5915;
+    text-decoration: none;
+}
+
+#helpCentreModal .modal-content a:hover {
+    color: #c03b13;
+}
+
+#helpTopicsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+.help-topic {
+    border-bottom: solid 1px #333;
+}
+
+.help-topic h4{
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #e0e0e0;
+}
+
+#helpCentreModal button {
+    margin-top: 20px;
+}
+
+/* .references-modal .close-button {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    text-align: center;
+    padding: 5px;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #e0e0e0;
+    font-family: 'Alegreya', serif;
+    font-weight: 400;
+} */
 
 .card-table {
     align-self: center;
@@ -1055,7 +1154,7 @@ p {
 .card-table td {
     padding: 4px, 6px;
     text-align: left;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-weight: 400;
     height: 24px;
     vertical-align: middle;
@@ -1103,7 +1202,7 @@ p {
 .card-collection-count {
     font-size: 12px;
     color: #ec5915;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-weight: 400;
     height: 16px;
     /* Single-line height */
@@ -1176,7 +1275,7 @@ p {
 }
 
 .search-result div:not(.inputs) {
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-weight: 400;
 }
 
@@ -1188,12 +1287,15 @@ p {
     overflow-y: auto;
 }
 
-#searchInput {
-    max-width: 500px;
-}
-
 .text-with-close-x {
     display: flex;
+    width: calc(100% + 36px);
+}
+
+.text-with-close-x .text-input {
+    flex: 1 1 0%;
+    width: 100%;
+    min-width: 0;
 }
 
 .clear-search {
@@ -1221,7 +1323,7 @@ p {
     font-size: 24px;
     cursor: pointer;
     color: #e0e0e0;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-weight: 400;
 }
 
@@ -1252,7 +1354,7 @@ p {
     border-radius: 7px;
     resize: vertical;
     background: #0a0a0a;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-size: 16px;
     color: #e0e0e0;
     box-sizing: border-box;
@@ -1377,7 +1479,7 @@ p {
 }
 
 .filter-group label {
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-weight: 400;
     font-size: 14px;
     color: #e0e0e0;
@@ -1458,7 +1560,7 @@ p {
 
 /* Secondary message in Alegreya */
 .feedback .secondary-message {
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-weight: 400;
     font-size: 14px;
     margin-top: 2px;
@@ -1527,7 +1629,7 @@ p {
 #emptyPage a {
     color: #ec5915;
     cursor: pointer;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-weight: 400;
 }
 
@@ -1556,7 +1658,7 @@ body *::-webkit-scrollbar {
 }
 
 #quickCardSearchButton {
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-weight: 400;
     font-size: 16px;
     text-align: start;
@@ -1684,7 +1786,7 @@ body *::-webkit-scrollbar {
 .context-modal-content li {
     padding: 10px 15px;
     color: #e0e0e0;
-    font-family: 'Alegreya', Arial, sans-serif;
+    font-family: 'Alegreya', serif;
     font-weight: 400;
     font-size: 16px;
     cursor: pointer;
@@ -1729,6 +1831,16 @@ body *::-webkit-scrollbar {
     border: 2px solid #ff4500;
     /* Red-orange border */
     border-radius: 7px;
+}
+
+#noCardsInCollectionText {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-style: italic;
 }
 
 @media (max-width: 1470px) {
@@ -1811,6 +1923,11 @@ body *::-webkit-scrollbar {
         max-width: 800px;
     }
 
+    #helCentreModal .modal-content {
+        width: 90vw;
+        max-width: 600px;
+    }
+
     #searchResults {
         flex-direction: column;
         gap: 10px;
@@ -1835,13 +1952,14 @@ body *::-webkit-scrollbar {
     }
 
     .text-with-close-x {
-        width: 100%;
-        max-width: 100%;
+        width: calc(100% + 36px);
         height: auto;
     }
 
-    #searchInput {
+    .text-with-close-x .text-input {
+        flex: 1 1 0%;
         width: 100%;
+        min-width: 0;
     }
 
     .result-content .card-name {
@@ -1927,7 +2045,7 @@ body *::-webkit-scrollbar {
         width: 100vw;
         gap: 10px;
     }
-    
+
     .header-left {
         width: 100%;
         display: flex;
@@ -1957,6 +2075,7 @@ body *::-webkit-scrollbar {
     #emptyPage h3,
     #emptyPage p {
         text-align: center;
+        font-style: italic;
     }
 
     .button-group {
@@ -2016,10 +2135,6 @@ body *::-webkit-scrollbar {
         max-width: none;
     }
 
-    #noCardsInCollectionText {
-        text-align: center;
-    }
-
     .header-left {
         width: 100%;
         display: flex;
@@ -2072,11 +2187,13 @@ body *::-webkit-scrollbar {
         gap: 10px;
         width: 100%;
     }
+
     .sort-filter-container {
         width: 100%;
     }
 
-    #sortToggleButton, #filterToggleButton {
+    #sortToggleButton,
+    #filterToggleButton {
         width: 100%;
         max-width: none;
     }

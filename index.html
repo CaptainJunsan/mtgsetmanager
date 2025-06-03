@@ -82,33 +82,35 @@
                         <select id="deckSelect" class="text-input length-medium" disabled>
                             <option id="deckSelectDefaultOption" value="" selected disabled>Select deck...</option>
                         </select>
-                        <button id="closeDeckBtn" class="button secondary-button no-class small-button"
-                            disabled>Close
+                        <button id="closeDeckBtn" class="button secondary-button no-class small-button" disabled>Close
                             Deck</button>
-                        <button id="deleteDeckBtn" class="button secondary-button no-class small-button"
-                            disabled>Delete
+                        <button id="deleteDeckBtn" class="button secondary-button no-class small-button" disabled>Delete
                             Deck</button>
                     </div>
                 </div>
             </div>
         </div>
         <div id="collectionList" class="display-container full-width has-shadow" style="display: none;">
-            <div class="active-list-view-controls">
-                <div class="left-controls">
-                    <input type="text" id="searchCollectionList" class="text-input bottom-margin-10"
-                        placeholder="Search your collection..." style="display: none;">
-                    <div class="sort-filter-container">
-                        <button id="sortToggleButton" class="button secondary-button small-button"
-                            onclick="toggleSortControls()">Sort</button>
-                        <button id="filterToggleButton" class="button secondary-button small-button"
-                            onclick="toggleFilterControls()">Filter</button>
+            <p class="container-title">Cards View</p>
+            <div class="container-control-row">
+                <div class="active-list-view-controls">
+                    <div class="left-controls">
+                        <input type="text" id="searchCollectionList" class="text-input bottom-margin-10"
+                            placeholder="Search your collection..." style="display: none;">
+                        <div class="sort-filter-container">
+                            <button id="sortToggleButton" class="button secondary-button small-button"
+                                onclick="toggleSortControls()">Sort</button>
+                            <button id="filterToggleButton" class="button secondary-button small-button"
+                                onclick="toggleFilterControls()">Filter</button>
+                        </div>
+                    </div>
+                    <div class="right-controls">
+                        <p id="displayCount" style="display: none;">Displaying 0/0 cards</p>
                     </div>
                 </div>
-                <div class="right-controls">
-                    <p id="displayCount" style="display: none;">Displaying 0/0 cards</p>
-                </div>
             </div>
-            <p id="noCardsInCollectionText">No cards in collection. Click "Add Cards" to start building!</p>
+            <p id="noCardsInCollectionText">No cards in collection. Use the search at the top to add cards to your
+                collection.</p>
             <div id="sortFilterControlsContainer">
                 <div id="sortControls" class="sort-controls">
                     <select id="sortCriterion" class="text-input length-medium">
@@ -188,8 +190,10 @@
             <input type="text" id="editCollectionName" class="text-input" placeholder="Collection Name">
             <textarea id="editCollectionDescription" class="text-input" placeholder="Description (optional)"></textarea>
             <div class="button-group">
-                <button class="button secondary-button small-button" onclick="closeEditCollectionModal()">Cancel</button>
-                <button class="button primary-button small-button" onclick="saveCollectionDetails()">Save changes</button>
+                <button class="button secondary-button small-button"
+                    onclick="closeEditCollectionModal()">Cancel</button>
+                <button class="button primary-button small-button" onclick="saveCollectionDetails()">Save
+                    changes</button>
             </div>
         </div>
     </div>
@@ -297,11 +301,82 @@
                 <li><a href="https://fonts.google.com/" target="_blank">Google Fonts</a> - Cinzel and Alegreya fonts
                 </li>
             </ul>
-            <button class="button secondary-button medium-button" onclick="closeReferencesModal()">Close</button>
+            <button class="button secondary-button small-button" onclick="closeReferencesModal()">Close</button>
+        </div>
+    </div>
+    <div id="helpCentreModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="svg-close-button" onclick="closeHelpCentreModal()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M6 18L18 6" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </span>
+            <h2 class="title">Help centre</h2>
+            <p>Use the below documentation to help you get started with using the Collection Manager.</p>
+            <!-- <p>You can also search for help topics using the search box below.</p> -->
+            <!-- <input type="text" id="searchFAQ" class="text-input bottom-margin-10" placeholder="Search help topics..."> -->
+            <div id="helpTopicsContainer">
+                <div class="help-topic">
+                    <h4>General card search</h4>
+                    <p>You can search* for almost all cards accross the entire MTG history. Use the search input in the
+                        main header to search and view card details from accross the Magic history.</p>
+                    <p class="foot-note">* Search works using <a href="http://scryfall.com"
+                            target="_blank">Scryfall</a>'s vast card
+                        database.</p>
+                </div>
+                <div class="help-topic">
+                    <h4>Refining your search</h4>
+                    <p>Since we use <a href="http://scryfall.com" target="_blank">Scryfall</a>'s card indexing system,
+                        you can also use their intuitive and powerful <a href="https://scryfall.com/docs/syntax"
+                            target="_blank">syntax system</a> to refine your search straight from
+                        the search inpit.</p>
+                </div>
+                <div class="help-topic">
+                    <h4>Creating a new collection</h4>
+                    <p>To create a new collection, click the "New Collection" button in the header. Fill in the
+                        collection name and optional description, then click "Create".</p>
+                </div>
+                <div class="help-topic">
+                    <h4>Importing or loading an existing collection</h4>
+                    <p>To import or load an existing collection, click the "Load..." button in the header, then select
+                        the desired file in your device's file picker.</p>
+                </div>
+                <div class="help-topic">
+                    <h4>Adding cards to your collection</h4>
+                    <p>To add cards, click the "Search to add cards..." text field in the header. Search for the card
+                        you want
+                        to add, then click the "Add" button next to the card in the search results.</p>
+                </div>
+                <div class="help-topic">
+                    <h4>Managing your collection</h4>
+                    <p>Once you have a collection loaded, you can manage it by adding or removing cards, creating decks,
+                        and
+                        saving your changes. Use the "Save Collection" button to save your current collection state.</p>
+                </div>
+                <div class="help-topic">
+                    <h4>Creating and managing decks</h4>
+                    <p>To create a deck, click the "Create Deck" button in the deck control panel. Fill in the deck name
+                        and select a format, then click "Create". You can add cards to your deck by searching for them
+                        and clicking the "Add to Deck" button.</p>
+                </div>
+                <div class="help-topic">
+                    <h4>Importing cards from MTG Arena</h4>
+                    <p>To import cards from MTG Arena, click the "Import..." button in the deck control panel. Paste
+                        your copied MTG Arena deck export in the text box, or upload a .txt file containing your deck.
+                        Click "Import Cards" to add them to your collection.</p>
+                </div>
+                <div class="help-topic">
+                    <h4>View card details</h4>
+                    <p>Click on any card in your collection to open the card details modal. Here you can view detailed
+                        information about the card, including its image, mana cost, type, and more.</p>
+                </div>
+            </div>
+            <button class="button secondary-button small-button" onclick="closeHelpCentreModal()">Close</button>
         </div>
     </div>
     <footer>
-        <p>Collection Manager v1.4.9 © Mr. Bojangles 2025 | <a onclick="openReferencesModal()">References</a></p>
+        <p>Collection Manager v1.4.12 © Mr. Bojangles 2025 | <a onclick="openReferencesModal()">References</a> | <a
+                onclick="openHelpCentreModal()">Need help?</a></p>
     </footer>
     <input type="file" id="fileInput" style="display: none;">
     <script src="script.js"></script>
