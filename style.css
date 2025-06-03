@@ -935,6 +935,10 @@ p {
     height: 100%;
 }
 
+.result-list-mana-text-container .mana-text .ms-cost+.ms-cost {
+    margin-left: 6px;
+}
+
 .card-details-content .mana-text .ms-cost+.ms-cost {
     margin-left: 4px;
 }
@@ -1856,6 +1860,12 @@ body *::-webkit-scrollbar {
     .ms-cost {
         width: 20px;
         height: 20px;
+    }
+
+    .result-list-mana-text>i::after {
+        content: '';
+        clear: both;
+        width: 10px;
     }
 
     .card-table {
