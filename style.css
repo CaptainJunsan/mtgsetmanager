@@ -315,7 +315,6 @@
 
 .button-group {
     display: flex;
-    justify-content: flex-start;
     align-items: center;
     gap: 10px;
 }
@@ -603,11 +602,11 @@ p {
 .search-result {
     display: flex;
     align-items: flex-start;
-    height: 250px;
+    height: 100%;
     gap: 10px;
-    padding: 5px;
-    border: 1px solid transparent;
-    border-radius: 10px;
+    padding: 5px 5px 20px 5px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #333;
 }
 
 .search-result .content {
@@ -630,7 +629,7 @@ p {
 }
 
 .search-result img {
-    max-width: 250px;
+    width: 200px;
     height: 100%;
     border-radius: 10px;
 }
@@ -645,6 +644,10 @@ p {
     font-size: 12px;
     font-style: italic;
     color: #ffffff5e;
+}
+
+.search-result .add-button-container {
+    margin-top: 10px;
 }
 
 .qty-and-treatment {
@@ -901,8 +904,6 @@ p {
 
 .card-details-modal .card-details-content .secondary-button {
     margin-top: 20px;
-    padding: 12px 20px;
-    font-size: 16px;
     border: 1px solid #ec5915;
     background: #000000;
     transition: background 300ms, box-shadow 300ms;
@@ -1501,35 +1502,28 @@ p {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    /* Changed from left: 50% to position in bottom-right */
     transform: none;
-    /* Remove the centering transform */
+    height: 47px;
+    width: fit-content;
     display: flex;
     flex-direction: row;
-    /* Changed from column-reverse to row */
     gap: 10px;
     z-index: 1001;
-    overflow-x: auto;
-    /* Allow horizontal overflow */
     max-width: 100vw;
-    /* Prevent increasing screen size */
     padding-right: 10px;
-    /* Add padding to avoid edge cutoff */
+    overflow-y: scroll;
 }
 
 /* Feedback Toaster */
 .feedback {
-    padding: 12px 48px 12px 24px;
-    /* Increased padding-right from 36px to 48px for more gap */
-    border-radius: 10px;
-    font-family: 'Cinzel', serif;
-    font-weight: 700;
-    font-size: 16px;
+    padding: 5px 40px 5px 10px;
+    border-radius: 3px;
+    font-family: 'Alegreya', serif;
+    font-weight: 400;
+    font-size: 14px;
     color: #e0e0e0;
-    animation: slideUp 300ms ease-in-out, pop 0.5s ease-in-out;
+    animation: slideUp 150ms ease-in-out, pop 300ms ease-in-out;
     text-align: left;
-    max-width: 400px;
-    width: auto;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -1554,16 +1548,16 @@ p {
 
 /* Main message in Cinzel */
 .feedback .main-message {
-    font-family: 'Cinzel', serif;
-    font-weight: 700;
-    font-size: 16px;
+    font-family: 'Alegreya', serif;
+    font-weight: 400;
+    font-size: 14px;
 }
 
 /* Secondary message in Alegreya */
 .feedback .secondary-message {
     font-family: 'Alegreya', serif;
     font-weight: 400;
-    font-size: 14px;
+    font-size: 12px;
     margin-top: 2px;
 }
 
@@ -1571,11 +1565,11 @@ p {
 .feedback .close-feedback {
     position: absolute;
     top: 50%;
-    right: 12px;
+    right: 10px;
     transform: translateY(-50%);
-    width: 32px;
-    height: 32px;
-    font-size: 28px;
+    width: 16px;
+    height: 16px;
+    font-size: 14px;
     color: #e0e0e0;
     cursor: pointer;
     display: flex;
@@ -1803,13 +1797,17 @@ body *::-webkit-scrollbar {
     width: 90%;
 }
 
+#addToDeckModal .button-group {
+    justify-content: flex-end;
+}
+
 #deckSearchInput {
     margin-bottom: 15px;
 }
 
 #deckCardCount {
     margin: 10px 0;
-    font-weight: bold;
+    font-weight: 400;
 }
 
 #deckSelect {
@@ -1849,6 +1847,7 @@ body *::-webkit-scrollbar {
         flex-direction: column;
         align-items: center;
         width: 100%;
+        padding-bottom: 20px;
     }
 
     .text-input,
@@ -2056,6 +2055,7 @@ body *::-webkit-scrollbar {
 
     #mainHeader h5 {
         font-size: 20px;
+        padding-bottom: 20px;
     }
 
     #headerLogo {

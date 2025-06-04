@@ -249,7 +249,7 @@ function showFeedback(message, type = 'info', persist = false) {
         success: [message, `${message} Nice work!`, `${message} You're on fire!`, `${message} Ready for action!`, `${message} Let's go!`],
         error: [message, `Oops, ${message.toLowerCase()}`, `Uh-oh, ${message.toLowerCase()}`, `Something went wrong: ${message.toLowerCase()}`],
         info: [message, `${message} Let's keep going!`, `${message} Good to know!`, `${message} Heads up!`],
-        loading: [message]
+        loading: [message, `${message} Hang tight!`, `${message} Almost there!`, `${message} Just a moment...`]
     };
     const selectedMessage = type === 'loading' ? message : messages[type][Math.floor(Math.random() * messages[type].length)];
 
@@ -577,9 +577,24 @@ function selectDeck(deckIndex) {
         showFeedback('Viewing collection.', 'info');
     } else {
         currentView = parseInt(deckIndex);
-        showFeedback(`Viewing deck: ${currentCollection.decks[currentView].name}`, 'info');
+        const deck = currentCollection.decks[currentView];
+
+        // Remove orphaned cards no longer in collection
+        deck.cards = deck.cards.map(deckCard => {
+            const collectionCard = currentCollection.cards.find(c => c.card.id === deckCard.cardId && c.treatment === deckCard.treatment);
+            if (collectionCard) {
+                return {
+                    ...deckCard,
+                    quantity: Math.min(deckCard.quantity, collectionCard.quantity)
+                };
+            }
+            return null; // remove entirely if not in collection at all
+        }).filter(Boolean);
+
+        showFeedback(`Viewing deck: ${deck.name}`, 'info');
     }
-    updateCollectionList();
+
+    updateCollectionList(); // Will reflect cleaned-up deck
     updateDeckControlButtons();
 }
 
@@ -792,6 +807,13 @@ function displayCollectionForDeck() {
         collectionForDeckList.appendChild(div);
     });
 
+    if (collectionForDeckList.children.length === 0) {
+        collectionForDeckList.style.display = 'none';
+        return;
+    } else {
+        collectionForDeckList.style.display = 'grid';
+    }
+
     deckCardCount.innerText = `${totalDeckCards}/${deck.tempCards.length} cards in Deck`;
 }
 
@@ -863,13 +885,14 @@ function openCardDetailsModal(card, treatment, fromSearch = false) {
                 ${card.power && card.toughness ? `<p>${card.power}/${card.toughness}</p>` : ''}
                 <p class="mana-text">${replaceManaSymbols(card.oracle_text || '')}</p>
                 ${fromSearch && isCollectionActive ?
-                `<button class="button primary-button medium-button" onclick="addToCollection('${card.id}')">Add to Collection</button>` :
+                `<button class="button primary-button small-button" onclick="addToCollection('${card.id}')">Add to Collection</button>` :
                 fromSearch ? '' :
                     isCollectionActive ? `
                     <div>
                         <label for="removeQty-${card.id}">Remove: </label>
                         <input type="number" id="removeQty-${card.id}" class="text-input quantity" min="1" max="${cardCount}" value="1" style="width: 50px; margin-right: 10px;">
                         ${hasDecks ? `
+                            <label for="source-${card.id}">from&nbsp;</label>
                             <select id="source-${card.id}" class="text-input text-input-dropdown" style="width: 150px; margin-right: 10px;">
                                 <option value="collection">Collection</option>
                                 ${currentCollection.decks.map((deck, index) => `<option value="${index}">${deck.name}</option>`).join('')}
@@ -938,7 +961,6 @@ const searchCardsDebounced = debounce(async () => {
         console.error(`Search error for query "${query}":`, error);
         if (searchId === latestSearchId) {
             searchResults.innerHTML = '<p>Error fetching cards. Please try again.</p>';
-            showFeedback('Failed to fetch cards. Check your connection.', 'error');
         }
     }
 }, 300);
@@ -1107,34 +1129,40 @@ async function updateCollectionList() {
         cardsToDisplay = currentCollection.cards;
     } else {
         const deck = currentCollection.decks[currentView];
+
+        // Sanitize card list by syncing with cardCache and actual collection availability
         cardsToDisplay = deck.cards.map(deckCard => {
             const fullCard = cardCache[deckCard.cardId];
-            if (fullCard) {
-                return { card: fullCard, quantity: deckCard.quantity, treatment: deckCard.treatment };
+            const inCollection = currentCollection.cards.find(c => c.card.id === deckCard.cardId && c.treatment === deckCard.treatment);
+
+            if (fullCard && inCollection) {
+                // Adjust deck quantity if it exceeds available collection count
+                const safeQty = Math.min(deckCard.quantity, inCollection.quantity);
+                return { card: fullCard, quantity: safeQty, treatment: deckCard.treatment };
             }
-            console.warn(`Card ${deckCard.cardId} not in cache.`);
+
             return null;
-        }).filter(c => c !== null);
+        }).filter(Boolean); // remove nulls
     }
 
-    // Apply filters
-    const filteredCards = cardsToDisplay.filter(card => {
-        const { card: fullCard } = card;
+    const filteredCards = cardsToDisplay.filter(({ card: fullCard }) => {
         const colorMatch = !currentFilters.colors.length ||
             (fullCard.color_identity && currentFilters.colors.some(color => fullCard.color_identity.includes(color))) ||
             (fullCard.color_identity?.length === 0 && currentFilters.colors.includes('Colorless')) ||
             (fullCard.color_identity?.length > 1 && currentFilters.colors.includes('Multicolor'));
+
         const manaCostMatch = !currentFilters.manaCosts.length ||
             currentFilters.manaCosts.some(cost => cost === 7 ? fullCard.cmc >= 7 : fullCard.cmc === cost);
+
         const rarityMatch = !currentFilters.rarities.length ||
             currentFilters.rarities.includes(fullCard.rarity.toLowerCase());
+
         return colorMatch && manaCostMatch && rarityMatch;
     });
 
-    // Sort the filtered cards
     sortCards(filteredCards, currentSort.criterion, currentSort.direction);
 
-    // Render
+    // Render cards
     collectionCardsList.innerHTML = '';
     filteredCards.forEach(({ card: fullCard, quantity, treatment }) => {
         const rarity = fullCard.rarity || 'unknown';
@@ -1155,8 +1183,8 @@ async function updateCollectionList() {
                 <tr>
                     <td class="quantity-cell">${quantity}</td>
                     <td>${fullCard.name}</td>
-                    <td title="${rarity.charAt(0).toUpperCase() + rarity.slice(1)}" class="rarity-symbol ${rarity.toLowerCase()} table-rarity-symbol">${displayRarity}</td>
-                    <td title="${treatment.charAt(0).toUpperCase() + treatment.slice(1)}">${treatment === 'foil' ? '<span class="foil-star">★</span>' : '<span class="non-foil-dot">•</span>'}</td>
+                    <td title="${rarity}" class="rarity-symbol ${rarity.toLowerCase()} table-rarity-symbol">${displayRarity}</td>
+                    <td title="${treatment}">${treatment === 'foil' ? '<span class="foil-star">★</span>' : '<span class="non-foil-dot">•</span>'}</td>
                 </tr>
             </table>
         `;
@@ -1165,7 +1193,7 @@ async function updateCollectionList() {
         setTimeout(() => div.classList.add('added'), 10);
     });
 
-    // Update counts
+    // Update UI elements
     const totalCards = cardsToDisplay.reduce((sum, c) => sum + c.quantity, 0);
     collectionCardCount.innerText = `Collection cards: ${totalCards}`;
     collectionCardCount.classList.add('updated');
@@ -1174,6 +1202,7 @@ async function updateCollectionList() {
     updateUIState();
     if (searchCollectionList.value) searchCollectionDebounced();
 }
+
 
 // Apply sort debug function
 function applySort() {
@@ -1263,7 +1292,10 @@ function removeFromCollection(cardId, treatment, source = 'collection') {
         return;
     }
 
-    const cardElement = collectionCardsList.querySelector(`[data-card-name="${cardEntry.card ? cardEntry.card.name.replace(/"/g, '\\"') : cardEntry.name.replace(/"/g, '\\"')}"]`);
+    const fullCard = cardEntry.card || cardCache[cardEntry.cardId];
+    const safeName = fullCard?.name ? fullCard.name.replace(/"/g, '\\"') : '';
+    const cardElement = collectionCardsList.querySelector(`[data-card-name="${safeName}"]`);
+
     if (cardElement) {
         cardElement.classList.add('removed');
         const particleDiv = document.createElement('div');
@@ -1278,7 +1310,7 @@ function removeFromCollection(cardId, treatment, source = 'collection') {
         if (source === 'collection') {
             currentCollection.cards = currentCollection.cards.filter(c => !(c.card.id === cardId && c.treatment === treatment));
 
-            // Adjust each deck that includes this card
+            // Adjust from all decks
             let remainingToRemove = removeQty;
             currentCollection.decks.forEach(deck => {
                 const deckCard = deck.cards.find(c => c.cardId === cardId && c.treatment === treatment);
@@ -1292,15 +1324,29 @@ function removeFromCollection(cardId, treatment, source = 'collection') {
                 }
             });
         } else {
-            targetCards = targetCards.filter(c => !(c.cardId === cardId && c.treatment === treatment));
+            // Remove completely from deck
+            const deckIndex = parseInt(source);
+            const deck = currentCollection.decks[deckIndex];
+            deck.cards = deck.cards.filter(c => !(c.cardId === cardId && c.treatment === treatment));
         }
     } else {
+        // Works for both collection and deck
         cardEntry.quantity -= removeQty;
     }
 
+
     console.log('Current collection after remove:', JSON.parse(JSON.stringify(currentCollection)));
-    updateCollectionList();
+
+    // Refresh the right list view: collection or deck
+    if (currentView === 'collection') {
+        updateCollectionList(); // show all collection cards
+    } else {
+        selectDeck(currentView); // re-renders just the current deck view
+    }
+
     closeCardDetailsModal();
+
+    console.log('Deck view after update:', currentCollection.decks[currentView]);
     showFeedback(`${removeQty} × ${cardEntry.card ? cardEntry.card.name : cardEntry.name} (${treatment}) removed from ${source === 'collection' ? 'collection' : currentCollection.decks[source].name}!`, 'success');
 }
 
