@@ -53,6 +53,7 @@ const addCardsToDeckBtn = document.getElementById('addCardsToDeckBtn');
 const importCardsToDeckBtn = document.getElementById('importCardsToDeckBtn');
 const helpCentreModal = document.getElementById('helpCentreModal');
 const menuBar = document.getElementById('menuBar');
+const viewModeLabel = document.getElementById('viewModeLabel');
 // const sortFilterControlsContainer = document.getElementById('sortFilterControlsContainer');
 
 // Google Drive API configuration
@@ -113,6 +114,41 @@ function createPicker() {
     console.log('Google Picker created and visible');
 }
 
+function highlightContainers(name, deckIndex) {
+    const isCollectionActive = currentCollection.name !== '';
+    const isDeckSelected = currentView !== 'collection';
+    console.log('Highlighting containers based on current view:', {
+        isCollectionActive,
+        isDeckSelected
+    });
+
+    currentView = parseInt(deckIndex);
+    const deck = currentCollection.decks[currentView];
+
+    // Highlight the active collection or deck containers to indicate workspace for user
+    console.log('Highlighting containers based on current view');
+    if (isCollectionActive && !isDeckSelected) { // Check if a collection is active
+        console.log('Highlighting collection info block and not deck control panel');
+
+        viewModeLabel.innerHTML = `<p>Working in Collection</p>`;
+        
+        collectionInfoBlock.style.border = '2px solid #ec5915';
+        deckControlPanel.style.border = 'none';
+    } else if (isCollectionActive && isDeckSelected) { // Check if a deck is selected
+        console.log('Highlighting deck control panel and not collection info block');
+
+        viewModeLabel.innerHTML = `<p>Wroking in Deck: ${deck.name}</p>`;
+
+        collectionInfoBlock.style.border = 'none';
+        deckControlPanel.style.border = '2px solid #ec5915';
+    } else if (!isCollectionActive && !isDeckSelected) { // Catch edge case when no collection or deck is active
+        console.log('No collection or deck active, removing highlights');
+
+        collectionInfoBlock.style.border = 'none';
+        deckControlPanel.style.border = 'none';
+    }
+}
+
 async function fetchFullCardData(card) {
     if (!cardCache[card.id]) {
         const response = await fetch(`https://api.scryfall.com/cards/${card.id}`);
@@ -157,6 +193,8 @@ function loadFileFromDrive(fileId) {
     }).catch(error => {
         showFeedback('Failed to load file from Google Drive.', 'error');
     });
+
+    highlightContainers();
 }
 
 // Set Default Sorting Order to Set Number, Ascending
@@ -333,9 +371,6 @@ function updateUIState() {
 
     menuBar.style.display = !isCollectionActive ? 'flex' : 'none';
 
-    // createNewCollectionButton.disabled = isCollectionActive;
-    // loadCollectionButton.disabled = isCollectionActive;
-
     if (isCollectionActive) {
         collectionNameDisplay.innerText = `${currentCollection.name}`;
         document.getElementById('collectionDescriptionDisplay').innerText = currentCollection.description || '';
@@ -404,7 +439,7 @@ function closeLoadCollectionModal() {
     loadCollectionModal.classList.remove('active');
 }
 
-loadCollectionModal.addEventListener('click', (event) => {
+loadCollectionModal.addEventListener('click', (event) => { // 
     if (event.target === loadCollectionModal) {
         closeLoadCollectionModal();
     }
@@ -486,6 +521,8 @@ uploadFromDeviceBtn.addEventListener('click', () => {
     };
     fileInput.click();
     closeLoadCollectionModal();
+
+    highlightContainers();
 });
 
 // Open the Edit Collection Modal and pre-populate fields
@@ -546,6 +583,8 @@ function createDeck() {
     updateDeckControlButtons();                // Enable buttons
     closeCreateDeckModal();
     showFeedback(`Deck "${deckName}" created!`, 'success');
+
+    highlightContainers();
 }
 
 // Update Deck Select Options
@@ -583,7 +622,7 @@ function selectDeck(deckIndex) {
                     quantity: Math.min(deckCard.quantity, collectionCard.quantity)
                 };
             }
-            return null; // remove entirely if not in collection at all
+            return null;
         }).filter(Boolean);
 
         showFeedback(`Viewing deck: ${deck.name}`, 'info');
@@ -591,6 +630,8 @@ function selectDeck(deckIndex) {
 
     updateCollectionList(); // Will reflect cleaned-up deck
     updateDeckControlButtons();
+
+    highlightContainers(deckIndex);
 }
 
 // Close Deck
@@ -605,6 +646,8 @@ function closeDeck() {
     updateCollectionList();                           // Show all collection cards
     updateDeckControlButtons();                       // Disable buttons
     showFeedback('Closed deck. Viewing collection.', 'info');
+
+    highlightContainers();
 }
 
 // Delete Deck
@@ -625,6 +668,8 @@ function deleteDeck() {
         updateDeckControlButtons();                   // Disable buttons
         showFeedback(`Deck "${deckName}" deleted.`, 'success');
     }
+
+    highlightContainers();
 }
 
 // Update Deck Control Buttons
@@ -662,6 +707,8 @@ function saveCollectionDetails() {
     document.getElementById('collectionDescriptionDisplay').style.display = description ? 'block' : 'none';
     closeEditCollectionModal();
     showFeedback(`Collection details updated to "${name}"!`, 'success');
+
+    highlightContainers(name, null);
 }
 
 // Collection creation
@@ -707,6 +754,8 @@ function createCollection() {
     showFeedback(`Collection "${name}" created!`, 'success');
     collectionNameInput.value = '';
     document.getElementById('collectionDescription').value = '';
+
+    highlightContainers();
 }
 
 function cancelCreateCollection() {
@@ -1197,7 +1246,6 @@ async function updateCollectionList() {
     if (searchCollectionList.value) searchCollectionDebounced();
 }
 
-
 // Apply sort debug function
 function applySort() {
     currentSort.criterion = sortCriterionSelect.value;
@@ -1430,6 +1478,8 @@ function sortCards(cards, criterion, direction = 'asc') {
             return 0;
         }
     });
+
+    highlightContainers();
 }
 
 // Filters
@@ -1559,6 +1609,7 @@ function saveCollection() {
 function loadCollection(event) {
     if (currentCollection.name !== '' && !confirm('This will overwrite the current collection. Continue?')) return;
     openLoadCollectionModal(event);
+    highlightContainers();
 }
 
 // Unload collection
@@ -1574,6 +1625,7 @@ function unloadCollection() {
         collectionNameInput.value = '';
         document.getElementById('collectionDescription').value = '';
     }
+    highlightContainers();
 }
 
 // Initialize filter button icons
