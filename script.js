@@ -955,7 +955,7 @@ const searchCardsDebounced = debounce(async () => {
     } catch (error) {
         console.error(`Search error for query "${query}":`, error);
         if (searchId === latestSearchId) {
-            searchResults.innerHTML = '<p>Error fetching cards. Please try again.</p>';
+            searchResults.innerHTML = '<p id="searchErrorMessage">Error fetching cards. Please try again.</p>';
         }
     }
 }, 300);
