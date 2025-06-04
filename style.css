@@ -1670,9 +1670,14 @@ body *::-webkit-scrollbar {
 #syntaxIdeas {
     display: flex;
     flex-direction: row;
+    overflow-x: auto;
     gap: 3px;
     margin: -15px 5px 5px 5px;
-    overflow-x: scroll;
+    border-radius: 2px;
+    scroll-behavior: smooth;
+    /* optional for smoother swiping */
+    -webkit-overflow-scrolling: touch;
+    /* for iOS momentum scroll */
 }
 
 .syntax-idea {
@@ -1903,6 +1908,10 @@ body *::-webkit-scrollbar {
         flex-wrap: wrap;
         width: 100%;
         justify-content: flex-end;
+    }
+
+    #syntaxIdeas {
+        border-radius: 7px;
     }
 
     .syntax-idea {

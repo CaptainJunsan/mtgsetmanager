@@ -845,7 +845,6 @@ function closeAddCardModal() {
 function clearSearchInput() {
     searchInput.value = '';
     searchResults.innerHTML = '';
-    // document.getElementById('clearSearchBtn').style.display = 'none';
     searchInput.focus();
 }
 
@@ -962,7 +961,7 @@ const searchCardsDebounced = debounce(async () => {
 
 searchInput.addEventListener('input', (e) => {
     searchCardsDebounced();
-    document.getElementById('clearSearchBtn').style.display = e.target.value.trim() ? 'block' : 'none';
+    // document.getElementById('clearSearchBtn').style.display = e.target.value.trim() ? 'block' : 'none';
 });
 
 // Render search results
