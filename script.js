@@ -52,6 +52,7 @@ const deckSelectDefaultOption = document.getElementById('deckSelectDefaultOption
 const addCardsToDeckBtn = document.getElementById('addCardsToDeckBtn');
 const importCardsToDeckBtn = document.getElementById('importCardsToDeckBtn');
 const helpCentreModal = document.getElementById('helpCentreModal');
+const menuBar = document.getElementById('menuBar');
 // const sortFilterControlsContainer = document.getElementById('sortFilterControlsContainer');
 
 // Google Drive API configuration
@@ -330,16 +331,10 @@ function updateUIState() {
         sortToggleButton.style.display = isCollectionActive && hasCards ? 'flex' : 'none';
     }
 
-    // if (!sortControls.classList.contains('visible') && !filterControls.classList.contains('visible')) {
-    //     sortFilterControlsContainer.style.display = 'none';
-    // } else if (sortControls.classList.contains('visible') || filterControls.classList.contains('visible')) {
-    //     sortFilterControlsContainer.style.display = 'flex';
-    // }
+    menuBar.style.display = !isCollectionActive ? 'flex' : 'none';
 
-    createNewCollectionButton.disabled = isCollectionActive;
-    loadCollectionButton.disabled = isCollectionActive;
-    // createNewCollectionButton.style.opacity = isCollectionActive ? '0.5' : '1';
-    // loadCollectionButton.style.opacity = isCollectionActive ? '0.5' : '1';
+    // createNewCollectionButton.disabled = isCollectionActive;
+    // loadCollectionButton.disabled = isCollectionActive;
 
     if (isCollectionActive) {
         collectionNameDisplay.innerText = `${currentCollection.name}`;

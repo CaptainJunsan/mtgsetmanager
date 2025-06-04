@@ -76,7 +76,7 @@
                         <button class="button primary-button no-class small-button"
                             onclick="openCreateDeckModal()">Create Deck</button>
                         <button id="addCardsToDeckBtn" class="button secondary-button no-class small-button"
-                            onclick="openAddCardModalWithDestination()">Add Cards</button>
+                            onclick="openAddCardModalWithDestination()">Add from Collection</button>
                         <button id="importCardsToDeckBtn" class="button secondary-button no-class small-button"
                             onclick="openImportCardsModal()">Import...</button>
                         <select id="deckSelect" class="text-input length-medium" disabled>
@@ -253,6 +253,12 @@
                         <path d="M6 6L18 18M6 18L18 6" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" />
                     </svg></span>
             </div>
+            <div id="syntaxIdeas">
+                <p class="syntax-idea" onclick="searchInput.value = 'cmc:3'; searchCardsDebounced();">Mana Value: 3</p>
+                <p class="syntax-idea" onclick="searchInput.value = 'in:tdm'; searchCardsDebounced();">From Set: TDM</p>
+                <p class="syntax-idea" onclick="searchInput.value = 'c:r'; searchCardsDebounced();">Mana Color: Red</p>
+                <p class="syntax-idea" onclick="searchInput.value = 'c:r -c:m'; searchCardsDebounced();">Exclude: Multicolor</p>
+            </div>
             <div id="searchResults"></div>
         </div>
     </div>
@@ -375,7 +381,7 @@
         </div>
     </div>
     <footer>
-        <p>Collection Manager v1.5.0 © Mr. Bojangles 2025 | <a onclick="openReferencesModal()">References</a> | <a
+        <p>Collection Manager v1.5.2 © Mr. Bojangles 2025 | <a onclick="openReferencesModal()">References</a> | <a
                 onclick="openHelpCentreModal()">Need help?</a></p>
     </footer>
     <input type="file" id="fileInput" style="display: none;">
