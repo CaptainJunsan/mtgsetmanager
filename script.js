@@ -114,37 +114,46 @@ function createPicker() {
     console.log('Google Picker created and visible');
 }
 
-function highlightContainers(name, deckIndex) {
-    const isCollectionActive = currentCollection.name !== '';
+function highlightContainers(deckIndex) {
+    const collectionInfoBlock = document.getElementById('collectionInfo');
+    const collectionList = document.getElementById('collectionCardsList');
+    const deckControlPanel = document.getElementById('deckControlPanel');
+    const viewModeLabel = document.getElementById('viewModeLabel');
+
+    const isCollectionActive = currentView === 'collection';
     const isDeckSelected = currentView !== 'collection';
+
     console.log('Highlighting containers based on current view:', {
         isCollectionActive,
         isDeckSelected
     });
 
-    currentView = parseInt(deckIndex);
-    const deck = currentCollection.decks[currentView];
-
-    // Highlight the active collection or deck containers to indicate workspace for user
-    console.log('Highlighting containers based on current view');
-    if (isCollectionActive && !isDeckSelected) { // Check if a collection is active
-        console.log('Highlighting collection info block and not deck control panel');
-
+    if (isCollectionActive) {
+        console.log('Highlighting collection view');
         viewModeLabel.innerHTML = `<p>Working in Collection</p>`;
-        
         collectionInfoBlock.style.border = '2px solid #ec5915';
+        if (collectionList.innerHTML == '') {
+            collectionList.style.border = 'none';
+        } else {
+            collectionList.style.border = '2px solid #ec5915';
+        }
         deckControlPanel.style.border = 'none';
-    } else if (isCollectionActive && isDeckSelected) { // Check if a deck is selected
-        console.log('Highlighting deck control panel and not collection info block');
-
-        viewModeLabel.innerHTML = `<p>Wroking in Deck: ${deck.name}</p>`;
-
-        collectionInfoBlock.style.border = 'none';
+    } else if (isDeckSelected) {
+        const deck = currentCollection.decks[currentView];
+        console.log('Highlighting deck view');
+        viewModeLabel.innerHTML = `<p>Working in Deck: ${deck.name}</p>`;
         deckControlPanel.style.border = '2px solid #ec5915';
-    } else if (!isCollectionActive && !isDeckSelected) { // Catch edge case when no collection or deck is active
-        console.log('No collection or deck active, removing highlights');
-
+        if (collectionList.innerHTML == '') {
+            collectionList.style.border = 'none';
+        } else {
+            collectionList.style.border = '2px solid #ec5915';
+        }
         collectionInfoBlock.style.border = 'none';
+    } else {
+        console.log('No active workspace');
+        viewModeLabel.innerHTML = '';
+        collectionInfoBlock.style.border = 'none';
+        collectionList.style.border = 'none';
         deckControlPanel.style.border = 'none';
     }
 }
@@ -194,7 +203,7 @@ function loadFileFromDrive(fileId) {
         showFeedback('Failed to load file from Google Drive.', 'error');
     });
 
-    highlightContainers();
+    highlightContainers(currentView);
 }
 
 // Set Default Sorting Order to Set Number, Ascending
@@ -584,12 +593,14 @@ function createDeck() {
     closeCreateDeckModal();
     showFeedback(`Deck "${deckName}" created!`, 'success');
 
-    highlightContainers();
+    highlightContainers(currentView);
 }
 
 // Update Deck Select Options
 function updateDeckSelectOptions(selectedIndex = null) {
     deckSelectDefaultOption.text = 'Select deck...';
+    deckSelect.innerHTML = ''; // Clear existing options
+    // Repopulate deck select options
     currentCollection.decks.forEach((deck, index) => {
         const option = document.createElement('option');
         option.value = index;
@@ -631,7 +642,7 @@ function selectDeck(deckIndex) {
     updateCollectionList(); // Will reflect cleaned-up deck
     updateDeckControlButtons();
 
-    highlightContainers(deckIndex);
+    highlightContainers(currentView);
 }
 
 // Close Deck
@@ -647,7 +658,7 @@ function closeDeck() {
     updateDeckControlButtons();                       // Disable buttons
     showFeedback('Closed deck. Viewing collection.', 'info');
 
-    highlightContainers();
+    highlightContainers(currentView);
 }
 
 // Delete Deck
@@ -669,7 +680,7 @@ function deleteDeck() {
         showFeedback(`Deck "${deckName}" deleted.`, 'success');
     }
 
-    highlightContainers();
+    highlightContainers(currentView);
 }
 
 // Update Deck Control Buttons
@@ -708,7 +719,7 @@ function saveCollectionDetails() {
     closeEditCollectionModal();
     showFeedback(`Collection details updated to "${name}"!`, 'success');
 
-    highlightContainers(name, null);
+    highlightContainers(currentView);
 }
 
 // Collection creation
@@ -755,7 +766,7 @@ function createCollection() {
     collectionNameInput.value = '';
     document.getElementById('collectionDescription').value = '';
 
-    highlightContainers();
+    highlightContainers(currentView);
 }
 
 function cancelCreateCollection() {
@@ -1478,8 +1489,6 @@ function sortCards(cards, criterion, direction = 'asc') {
             return 0;
         }
     });
-
-    highlightContainers();
 }
 
 // Filters
@@ -1609,7 +1618,8 @@ function saveCollection() {
 function loadCollection(event) {
     if (currentCollection.name !== '' && !confirm('This will overwrite the current collection. Continue?')) return;
     openLoadCollectionModal(event);
-    highlightContainers();
+
+    highlightContainers(currentView);
 }
 
 // Unload collection
@@ -1625,7 +1635,8 @@ function unloadCollection() {
         collectionNameInput.value = '';
         document.getElementById('collectionDescription').value = '';
     }
-    highlightContainers();
+
+    highlightContainers(currentView);
 }
 
 // Initialize filter button icons
@@ -1819,6 +1830,8 @@ function parseAndImportDeckText(deckText) {
         closeImportCardsModal();
         showFeedback(`Imported ${added} cards to deck "${deck.name}".`, 'success');
     });
+
+    highlightContainers(currentView);
 }
 
 // Listen for import cards button click
