@@ -287,7 +287,7 @@
         </div>
     </div>
     <div id="loadCollectionModal" class="context-modal">
-        <div class="context-modal-content">
+        <div id="contextModalMenu" class="context-modal-content">
             <ul>
                 <li id="loadFromGoogleDriveBtn">Load from Google Drive...</li>
                 <li id="uploadFromDeviceBtn">Upload from device...</li>
@@ -382,11 +382,12 @@
         </div>
     </div>
     <footer>
-        <p>Collection Manager v1.5.8 © Mr. Bojangles 2025 | <a onclick="openReferencesModal()">References</a> | <a
+        <p>Collection Manager v1.5.9 © Mr. Bojangles 2025 | <a onclick="openReferencesModal()">References</a> | <a
                 onclick="openHelpCentreModal()">Need help?</a></p>
     </footer>
     <input type="file" id="fileInput" style="display: none;">
     <script src="script.js"></script>
+    <script>window.dispatchEvent(new Event("resize"));</script>
     <script async defer src="https://apis.google.com/js/api.js" onload="onApiLoad()"></script>
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>

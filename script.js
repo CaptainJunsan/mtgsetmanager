@@ -36,6 +36,7 @@ const editCollectionModal = document.getElementById('editCollectionModal');
 const editCollectionNameInput = document.getElementById('editCollectionName');
 const editCollectionDescriptionInput = document.getElementById('editCollectionDescription');
 const loadCollectionModal = document.getElementById('loadCollectionModal');
+const contextModalMenu = document.getElementById('contextModalMenu');
 const loadFromGoogleDriveBtn = document.getElementById('loadFromGoogleDriveBtn');
 const uploadFromDeviceBtn = document.getElementById('uploadFromDeviceBtn');
 const createDeckModal = document.getElementById('createDeckModal');
@@ -52,6 +53,7 @@ const deckSelectDefaultOption = document.getElementById('deckSelectDefaultOption
 const addCardsToDeckBtn = document.getElementById('addCardsToDeckBtn');
 const importCardsToDeckBtn = document.getElementById('importCardsToDeckBtn');
 const helpCentreModal = document.getElementById('helpCentreModal');
+const mainHeader = document.getElementById('mainHeader');
 const menuBar = document.getElementById('menuBar');
 const viewModeLabel = document.getElementById('viewModeLabel');
 // const sortFilterControlsContainer = document.getElementById('sortFilterControlsContainer');
@@ -123,38 +125,37 @@ function highlightContainers(deckIndex) {
     const isCollectionActive = currentView === 'collection';
     const isDeckSelected = currentView !== 'collection';
 
-    console.log('Highlighting containers based on current view:', {
-        isCollectionActive,
-        isDeckSelected
-    });
+    // #ec5915 is the highlight color
+    // Default style setting: boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)'
+    // Highlighted style" boxShadow = '0 0px 12px rgba(255, 255, 255, 0.5)'
 
     if (isCollectionActive) {
         console.log('Highlighting collection view');
         viewModeLabel.innerHTML = `<p>Working in Collection</p>`;
-        collectionInfoBlock.style.border = '2px solid #ec5915';
+        collectionInfoBlock.style.boxShadow = '0 0px 12px rgba(255, 255, 255, 0.35)'
         if (collectionList.innerHTML == '') {
-            collectionList.style.border = 'none';
+            collectionList.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
         } else {
-            collectionList.style.border = '2px solid #ec5915';
+            collectionList.style.boxShadow = '0 0px 12px rgba(255, 255, 255, 0.35)'
         }
-        deckControlPanel.style.border = 'none';
+        deckControlPanel.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
     } else if (isDeckSelected) {
         const deck = currentCollection.decks[currentView];
         console.log('Highlighting deck view');
         viewModeLabel.innerHTML = `<p>Working in Deck: ${deck.name}</p>`;
-        deckControlPanel.style.border = '2px solid #ec5915';
+        deckControlPanel.style.boxShadow = '0 0px 12px rgba(255, 255, 255, 0.35)'
         if (collectionList.innerHTML == '') {
-            collectionList.style.border = 'none';
+            collectionList.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
         } else {
-            collectionList.style.border = '2px solid #ec5915';
+            collectionList.style.boxShadow = '0 0px 12px rgba(255, 255, 255, 0.35)'
         }
-        collectionInfoBlock.style.border = 'none';
+        collectionInfoBlock.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
     } else {
         console.log('No active workspace');
         viewModeLabel.innerHTML = '';
-        collectionInfoBlock.style.border = 'none';
-        collectionList.style.border = 'none';
-        deckControlPanel.style.border = 'none';
+        collectionInfoBlock.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
+        collectionList.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
+        deckControlPanel.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
     }
 }
 
@@ -363,7 +364,8 @@ function updateUIState() {
 
     if (isCollectionActive) {
         quickCardSearchButton.innerHTML = 'Search to add cards...';
-        quickCardSearchButton.style.border = '2px solid #ec5915';
+        quickCardSearchButton.style.border = '1px solid #ec5915';
+        quickCardSearchButton.style.boxShadow = '0 0 8px rgba(255, 255, 255, 0.35)'
     } else {
         quickCardSearchButton.innerHTML = 'Search any card in Magic...';
         quickCardSearchButton.style.border = '';
@@ -386,6 +388,19 @@ function updateUIState() {
         document.getElementById('collectionDescriptionDisplay').style.display = currentCollection.description ? 'block' : 'none';
     }
 }
+
+window.addEventListener('resize', () => {
+
+    if (window.innerWidth < 1470) {
+        contextModalMenu.style.top = `${mainHeader.offsetHeight - 5}px`;
+        contextModalMenu.style.left = 'auto';
+        contextModalMenu.style.right = 'auto';
+    } else if (window.innerWidth > 1469) {
+        contextModalMenu.style.top = `${mainHeader.offsetHeight - 10}px`;
+        contextModalMenu.style.left = 'auto';
+        contextModalMenu.style.right = '20px';
+    }
+});
 
 // Backup prompt
 function checkForBackup() {
@@ -686,6 +701,7 @@ function deleteDeck() {
 // Update Deck Control Buttons
 function updateDeckControlButtons() {
     const isDeckSelected = currentView !== 'collection';
+    
     closeDeckBtn.disabled = !isDeckSelected;
     deleteDeckBtn.disabled = !isDeckSelected;
     // deckSelect.style.cursor = !isDeckSelected ? 'not-allowed' : 'pointer';
