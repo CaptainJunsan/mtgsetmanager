@@ -53,7 +53,10 @@
     font-weight: 400;
     width: auto;
     white-space: nowrap;
-    display: inline-block;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
 .primary-button {

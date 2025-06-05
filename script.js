@@ -49,7 +49,7 @@ const deckCardCount = document.getElementById('deckCardCount');
 const closeDeckBtn = document.getElementById('closeDeckBtn');
 const deleteDeckBtn = document.getElementById('deleteDeckBtn');
 const deckSelect = document.getElementById('deckSelect');
-const deckSelectDefaultOption = document.getElementById('deckSelectDefaultOption');
+// const deckSelectDefaultOption = document.getElementById('deckSelectDefaultOption');
 const addCardsToDeckBtn = document.getElementById('addCardsToDeckBtn');
 const importCardsToDeckBtn = document.getElementById('importCardsToDeckBtn');
 const helpCentreModal = document.getElementById('helpCentreModal');
@@ -613,22 +613,41 @@ function createDeck() {
 
 // Update Deck Select Options
 function updateDeckSelectOptions(selectedIndex = null) {
-    deckSelectDefaultOption.text = 'Select deck...';
-    deckSelect.innerHTML = ''; // Clear existing options
-    // Repopulate deck select options
+    // Clear any existing options
+    deckSelect.innerHTML = '';
+
+    // Create and append the default option
+    const defaultOption = document.createElement('option');
+    defaultOption.id = 'deckSelectDefaultOption'; // to ensure styling works
+    defaultOption.disabled = true;
+    defaultOption.selected = selectedIndex === null;
+    defaultOption.text = currentCollection.decks.length > 0 ? 'Select deck...' : 'No decks available';
+    deckSelect.appendChild(defaultOption);
+
+    // Populate deck options
     currentCollection.decks.forEach((deck, index) => {
         const option = document.createElement('option');
         option.value = index;
         option.text = deck.name;
+        if (selectedIndex === index) option.selected = true;
         deckSelect.appendChild(option);
     });
-    if (selectedIndex !== null) {
-        deckSelectDefaultOption.selected = false;
-        deckSelectDefaultOption.text = 'Close deck to view collection';
-        deckSelect.value = selectedIndex;
-    }
+
+    // Enable or disable the select menu
     deckSelect.disabled = currentCollection.decks.length === 0;
+
+    // Optional styling
+    if (currentCollection.decks.length > 0) {
+        deckSelect.style.border = '1px solid #ffffff';
+        deckSelect.style.backgroundColor = '#0a0a0a';
+        deckSelect.style.color = '#e0e0e0';
+    } else {
+        deckSelect.style.border = '1px dashed #555';
+        deckSelect.style.color = '#aaa';
+        deckSelect.style.cursor = 'cursor';
+    }
 }
+
 
 // Select Deck
 function selectDeck(deckIndex) {
