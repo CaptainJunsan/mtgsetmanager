@@ -56,6 +56,7 @@ const helpCentreModal = document.getElementById('helpCentreModal');
 const mainHeader = document.getElementById('mainHeader');
 const menuBar = document.getElementById('menuBar');
 const viewModeLabel = document.getElementById('viewModeLabel');
+const syntaxIdeas = document.getElementById('syntaxIdeas');
 // const sortFilterControlsContainer = document.getElementById('sortFilterControlsContainer');
 
 // Google Drive API configuration
@@ -720,7 +721,7 @@ function deleteDeck() {
 // Update Deck Control Buttons
 function updateDeckControlButtons() {
     const isDeckSelected = currentView !== 'collection';
-    
+
     closeDeckBtn.disabled = !isDeckSelected;
     deleteDeckBtn.disabled = !isDeckSelected;
     // deckSelect.style.cursor = !isDeckSelected ? 'not-allowed' : 'pointer';
@@ -1042,6 +1043,11 @@ const searchCardsDebounced = debounce(async () => {
                 showFeedback('Too many results. Showing first 50 cards.', 'info');
             } else {
                 displaySearchResults(cards);
+                if (searchResults.innerHTML !== '') {
+                    syntaxIdeas.display = 'none';
+                } else {
+                    syntaxIdeas.display = 'flex';
+                }
             }
         } else {
             console.log(`Discarding outdated search results for query: "${query}" (Search ID: ${searchId})`);
@@ -1575,51 +1581,115 @@ function applyFilters() {
     updateCollectionList();
 }
 
+// Utility parser
+function evaluateScryfallSyntaxLocal(card, queryParts) {
+    return queryParts.every(part => {
+        if (part.startsWith('c:')) {
+            const color = part.slice(2).toUpperCase();
+            return card.color_identity.includes(color);
+        } else if (part.startsWith('-c:')) {
+            const color = part.slice(3).toUpperCase();
+            return !card.color_identity.includes(color);
+        } else if (part.startsWith('t:')) {
+            const type = part.slice(2).toLowerCase();
+            return card.type_line.toLowerCase().includes(type);
+        } else {
+            return card.name.toLowerCase().includes(part.toLowerCase()) ||
+                (card.oracle_text && card.oracle_text.toLowerCase().includes(part.toLowerCase()));
+        }
+    });
+}
+
+// Scryfall syntax parser
+function evaluateScryfallSyntax(query, data) {
+    const syntaxTokens = query.match(/-?\w+:[^\s]+/g) || [];
+    const textOnly = query.replace(/-?\w+:[^\s]+/g, '').trim();
+    const plainWords = textOnly.length ? textOnly.split(/\s+/) : [];
+
+    // First, evaluate all syntax tokens
+    const syntaxMatch = syntaxTokens.every(token => {
+        let negate = false;
+        if (token.startsWith('-')) {
+            negate = true;
+            token = token.slice(1);
+        }
+
+        const [key, value] = token.split(':');
+        let result = false;
+
+        switch (key) {
+            case 'c': // color
+                result = data.colors.includes(value.toUpperCase());
+                break;
+            case 't': // type
+                result = data.typeLine.toLowerCase().includes(value.toLowerCase());
+                break;
+            case 'o': // oracle text
+                result = data.oracleText.toLowerCase().includes(value.toLowerCase());
+                break;
+            case 'cmc':
+                const operatorMatch = value.match(/(<=?|>=?|=)?(\\d+)/);
+                if (operatorMatch) {
+                    const [, op, num] = operatorMatch;
+                    const n = parseInt(num);
+                    switch (op) {
+                        case '<': result = data.cmc < n; break;
+                        case '<=': result = data.cmc <= n; break;
+                        case '>': result = data.cmc > n; break;
+                        case '>=': result = data.cmc >= n; break;
+                        case '=':
+                        default: result = data.cmc === n;
+                    }
+                }
+                break;
+            case 'r': // rarity
+                result = data.rarity.toLowerCase() === value.toLowerCase();
+                break;
+            default:
+                return true;
+        }
+
+        return negate ? !result : result;
+    });
+
+    // Then, evaluate all plain words (if any)
+    const textMatch = plainWords.every(word =>
+        data.name.toLowerCase().includes(word) ||
+        data.typeLine.toLowerCase().includes(word) ||
+        data.oracleText.toLowerCase().includes(word)
+    );
+
+    return syntaxMatch && textMatch;
+}
+
 // Collection search
 const searchCollectionDebounced = debounce(() => {
-    const filter = searchCollectionList.value.toUpperCase();
+    const query = searchCollectionList.value.trim();
     const entries = collectionCardsList.getElementsByClassName('card-entry');
+    const queryParts = query.split(/\s+/);
+
+    if (!query) {
+        for (let entry of entries) entry.style.display = '';
+        updateDisplayCount();
+        return;
+    }
+
     for (let i = 0; i < entries.length; i++) {
         const entry = entries[i];
         const cardData = currentCollection.cards.find(c => c.card.name === entry.dataset.cardName);
-        const name = entry.dataset.cardName.toUpperCase();
-        const typeLine = entry.dataset.typeLine.toUpperCase() || '';
-        const oracleText = entry.dataset.oracleText.toUpperCase() || '';
-        const text = entry.textContent || entry.innerText;
-        const matchesSearch = name.includes(filter) || typeLine.includes(filter) || oracleText.includes(filter);
+        if (!cardData) continue;
 
-        if (matchesSearch) {
-            const colors = entry.dataset.colorIdentity ? entry.dataset.colorIdentity.split(',') : [];
-            const cmc = parseInt(entry.dataset.cmc);
-            const rarity = entry.dataset.rarity.toLowerCase();
-            let show = true;
+        const card = cardData.card;
 
-            if (currentFilters.colors.length > 0) {
-                let matchesColor = false;
-                if (currentFilters.colors.includes('Colorless') && colors.length === 0) matchesColor = true;
-                else if (currentFilters.colors.includes('Multicolor') && colors.length > 1) matchesColor = true;
-                else matchesColor = currentFilters.colors.some(c => colors.includes(c));
-                show = show && matchesColor;
-            }
+        const match = evaluateScryfallSyntaxLocal(card, queryParts);
 
-            if (currentFilters.manaCosts.length > 0) {
-                let matchesMana = false;
-                currentFilters.manaCosts.forEach(cost => {
-                    if (cost === 7 && cmc >= 7) matchesMana = true;
-                    else if (cmc === cost) matchesMana = true;
-                });
-                show = show && matchesMana;
-            }
-
-            if (currentFilters.rarities.length > 0) {
-                show = show && currentFilters.rarities.includes(rarity);
-            }
-
-            entry.style.display = show ? '' : 'none';
+        if (match) {
+            entry.style.display = '';
         } else {
             entry.style.display = 'none';
         }
     }
+
     updateDisplayCount();
 }, 300);
 

@@ -1685,7 +1685,7 @@ body *::-webkit-scrollbar {
     display: flex;
     flex-direction: row;
     overflow-x: auto;
-    gap: 3px;
+    gap: 5px;
     margin: -15px 5px 5px 5px;
     border-radius: 2px;
     scroll-behavior: smooth;
@@ -1695,7 +1695,7 @@ body *::-webkit-scrollbar {
 }
 
 .syntax-idea {
-    padding: 2px 3px;
+    padding: 4px 6px;
     border-radius: 2px;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Open Sans', 'Helvetica Neue', sans-serif;
     font-size: 12px;
@@ -1938,8 +1938,8 @@ body *::-webkit-scrollbar {
     }
 
     .syntax-idea {
-        padding: 3px 6px;
-        border-radius: 7px;
+        padding: 4px 6px;
+        border-radius: 5px;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Open Sans', 'Helvetica Neue', sans-serif;
         font-size: 12px;
         font-weight: 500;
