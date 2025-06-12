@@ -132,7 +132,7 @@ function highlightContainers(deckIndex) {
 
     if (isCollectionActive) {
         console.log('Highlighting collection view');
-        viewModeLabel.innerHTML = `<p>Working in Collection</p>`;
+        viewModeLabel.innerHTML = `<p>You are currently working in your Collection</p>`;
         collectionInfoBlock.style.boxShadow = '0 0px 12px rgba(255, 255, 255, 0.35)'
         if (collectionList.innerHTML == '') {
             collectionList.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
@@ -143,7 +143,7 @@ function highlightContainers(deckIndex) {
     } else if (isDeckSelected) {
         const deck = currentCollection.decks[currentView];
         console.log('Highlighting deck view');
-        viewModeLabel.innerHTML = `<p>Working in Deck: ${deck.name}</p>`;
+        viewModeLabel.innerHTML = `<p>You are currently working in a Deck: ${deck.name}</p>`;
         deckControlPanel.style.boxShadow = '0 0px 12px rgba(255, 255, 255, 0.35)'
         if (collectionList.innerHTML == '') {
             collectionList.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
@@ -883,8 +883,10 @@ function displayCollectionForDeck() {
         const div = document.createElement('div');
         div.className = 'card-entry';
         const imageUrl = card.image_uris?.normal || '';
-        div.innerHTML = `
-            ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" class="${treatment === 'foil' ? 'foil' : ''}">` : '<p>No image available</p>'}
+        div.innerHTML =
+            // ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" class="${treatment === 'foil' ? 'foil' : ''}">` : '<p>No image available</p>'}   <-- Original
+            `
+            ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}">` : '<p>No image available</p>'}
             <table class="card-table">
                 <tr>
                     <td class="quantity-cell">${availableQuantity}</td>
@@ -961,13 +963,15 @@ function openCardDetailsModal(card, treatment, fromSearch = false) {
         const isCollectionActive = currentCollection.name !== '';
         const cardCount = isCollectionActive ? currentCollection.cards.filter(c => c.card.id === card.id && c.treatment === treatment).reduce((sum, c) => sum + c.quantity, 0) : 0;
         const hasDecks = currentCollection.decks && currentCollection.decks.length > 0;
-        modalContent.innerHTML = `
+        modalContent.innerHTML =
+            // ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" class="${treatment === 'foil' ? 'foil' : ''}" style="max-width: 350px; height: auto; border-radius: 10px; margin-bottom: 20px;">` : '<p>No image available</p>'}   <-- 974
+            `
             <span class="svg-close-button" onclick="closeCardDetailsModal()">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M6 6L18 18M6 18L18 6" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round"/>
                 </svg>
             </span>
-            ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" class="${treatment === 'foil' ? 'foil' : ''}" style="max-width: 350px; height: auto; border-radius: 10px; margin-bottom: 20px;">` : '<p>No image available</p>'}
+            ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" style="max-width: 350px; height: auto; border-radius: 10px; margin-bottom: 20px;">` : '<p>No image available</p>'}
             <div class="card-details-content">
                 <h3>${card.name}</h3>
                 <p class="mana-text">${replaceManaSymbols(card.mana_cost || '')}</p>
@@ -1263,7 +1267,7 @@ async function updateCollectionList() {
         const rarity = fullCard.rarity || 'unknown';
         const displayRarity = rarityMap[rarity.toLowerCase()] || rarity.charAt(0).toUpperCase() + rarity.slice(1);
         const div = document.createElement('div');
-        div.className = 'card-entry';
+        div.className = `card-entry ${treatment === 'foil' ? 'foil' : ''}`;
         div.dataset.cardName = fullCard.name;
         div.dataset.typeLine = fullCard.type_line || '';
         div.dataset.oracleText = fullCard.oracle_text || '';
@@ -1273,7 +1277,7 @@ async function updateCollectionList() {
         div.dataset.collectorNumber = fullCard.collector_number || '9999';
         const imageUrl = fullCard.image_uris?.normal || '';
         div.innerHTML = `
-            ${imageUrl ? `<img src="${imageUrl}" alt="${fullCard.name}" class="${treatment === 'foil' ? 'foil' : ''}">` : '<p>No image available</p>'}
+            ${imageUrl ? `<img src="${imageUrl}" alt="${fullCard.name}">` : '<p>No image available</p>'}
             <table class="card-table">
                 <tr>
                     <td class="quantity-cell">${quantity}</td>
@@ -1287,6 +1291,37 @@ async function updateCollectionList() {
         collectionCardsList.appendChild(div);
         setTimeout(() => div.classList.add('added'), 10);
     });
+
+    // Render cards
+    // collectionCardsList.innerHTML = '';
+    // filteredCards.forEach(({ card: fullCard, quantity, treatment }) => {
+    //     const rarity = fullCard.rarity || 'unknown';
+    //     const displayRarity = rarityMap[rarity.toLowerCase()] || rarity.charAt(0).toUpperCase() + rarity.slice(1);
+    //     const div = document.createElement('div');
+    //     div.className = `card-entry ${treatment === 'foil' ? 'foil' : ''}`;
+    //     div.dataset.cardName = fullCard.name;
+    //     div.dataset.typeLine = fullCard.type_line || '';
+    //     div.dataset.oracleText = fullCard.oracle_text || '';
+    //     div.dataset.colorIdentity = fullCard.color_identity ? fullCard.color_identity.join(',') : '';
+    //     div.dataset.cmc = fullCard.cmc || 0;
+    //     div.dataset.rarity = rarity;
+    //     div.dataset.collectorNumber = fullCard.collector_number || '9999';
+    //     const imageUrl = fullCard.image_uris?.normal || '';
+    //     div.innerHTML = `
+    //         ${imageUrl ? `<img src="${imageUrl}" alt="${fullCard.name}" class="${treatment === 'foil' ? 'foil' : ''}">` : '<p>No image available</p>'}
+    //         <table class="card-table">
+    //             <tr>
+    //                 <td class="quantity-cell">${quantity}</td>
+    //                 <td>${fullCard.name}</td>
+    //                 <td title="${rarity}" class="rarity-symbol ${rarity.toLowerCase()} table-rarity-symbol">${displayRarity}</td>
+    //                 <td title="${treatment}">${treatment === 'foil' ? '<span class="foil-star">★</span>' : '<span class="non-foil-dot">•</span>'}</td>
+    //             </tr>
+    //         </table>
+    //     `;
+    //     div.addEventListener('click', () => openCardDetailsModal(fullCard, treatment));
+    //     collectionCardsList.appendChild(div);
+    //     setTimeout(() => div.classList.add('added'), 10);
+    // });
 
     // Update UI elements
     const totalCards = cardsToDisplay.reduce((sum, c) => sum + c.quantity, 0);
