@@ -110,8 +110,6 @@
                     </div>
                 </div>
             </div>
-            <p id="noCardsInCollectionText">No cards in collection. Use the search at the top to add cards to your
-                collection.</p>
             <div id="sortFilterControlsContainer">
                 <div id="sortControls" class="sort-controls">
                     <select id="sortCriterion" class="text-input length-medium">
@@ -169,6 +167,15 @@
                                     onclick="filterByRarity('mythic')">Mythic</button>
                             </div>
                         </div>
+                        <div class="filter-group">
+                            <label>Treatment</label>
+                            <div class="gap-5">
+                                <button class="filter-button-treatment" id="nonFoilFilterBtn"
+                                    onclick="filterByTreatment('non-foil')">Non-foil</button>
+                                <button class="filter-button-treatment" id="foilFilterBtn"
+                                    onclick="filterByTreatment('foil')">Foil</button>
+                            </div>
+                        </div>
                         <div id="resetFilterContainer" class="button-group gap-5">
                             <button class="button secondary-button small-button" onclick="clearFilters()"><svg
                                     id="buttonXicon" width="12" height="12" viewBox="0 0 24 24" fill="none"
@@ -181,7 +188,9 @@
                     </div>
                 </div>
             </div>
-
+            <p id="noCardsInCollectionText" style="display: none;">No cards in collection. Use the search at the top to
+                add cards to your
+                collection.</p>
             <div id="collectionCardsList" class="card-gallery"></div>
         </div>
     </div>
@@ -387,7 +396,7 @@
         </div>
     </div>
     <footer>
-        <p>Collection Manager v1.7.0 © Mr. Bojangles 2025 | <a onclick="openReferencesModal()">References</a> | <a
+        <p>Collection Manager v1.7.5 © Mr. Bojangles 2025 | <a onclick="openReferencesModal()">References</a> | <a
                 onclick="openHelpCentreModal()">Need help?</a></p>
     </footer>
     <input type="file" id="fileInput" style="display: none;">

@@ -83,9 +83,12 @@ function onPickerApiLoad() {
 function gisLoaded() {
     console.log('Google Identity Services loaded');
     tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: '1082824817658-ana0620kbg7rqa7krvn7nk06qat39k0e.apps.googleusercontent.com',
-        scope: 'https://www.googleapis.com/auth/drive',
-        callback: '',
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: (tokenResponse) => {
+            accessToken = tokenResponse.access_token;
+            createPicker(); // Only call Picker after token is set!
+        },
     });
     gisInited = true;
 }
@@ -172,6 +175,13 @@ async function fetchFullCardData(card) {
     return cardCache[card.id];
 }
 
+async function fetchAllPrintings(card) {
+    const response = await fetch(card.prints_search_uri);
+    if (!response.ok) throw new Error('Failed to fetch printings');
+    const data = await response.json();
+    return data.data; // Array of all printings/versions
+}
+
 function loadFileFromDrive(fileId) {
     gapi.client.drive.files.get({
         fileId: fileId,
@@ -215,7 +225,7 @@ let currentSort = { criterion: 'collector_number', direction: 'asc' };
 let currentCollection = { name: '', description: '', cards: [], decks: [] };
 let currentView = 'collection';
 const cardCache = {};
-let currentFilters = { colors: [], manaCosts: [], rarities: [] };
+let currentFilters = { colors: [], manaCosts: [], rarities: [], treatments: [] };
 let lastSaved = Date.now();
 let isCreatingCollection = false;
 
@@ -426,7 +436,7 @@ function toggleFilterControls() {
 
 // Update filter button text
 function updateFilterButtonText() {
-    const filterCount = currentFilters.colors.length + currentFilters.manaCosts.length + currentFilters.rarities.length;
+    const filterCount = currentFilters.colors.length + currentFilters.manaCosts.length + currentFilters.rarities.length + currentFilters.treatments.length;
     filterToggleButton.innerText = `Filter${filterCount > 0 ? `: ${filterCount}` : ''}`;
 }
 
@@ -526,7 +536,7 @@ uploadFromDeviceBtn.addEventListener('click', () => {
                         }))
                     })) : []
                 };
-                currentFilters = { colors: [], manaCosts: [], rarities: [] };
+                currentFilters = { colors: [], manaCosts: [], rarities: [], treatments: [] };
                 searchCollectionList.value = '';
                 updateCollectionList();
                 updateDeckSelectOptions();
@@ -763,7 +773,7 @@ function createNewCollection() {
     console.log('Creating new collection');
     try {
         isCreatingCollection = true;
-        currentFilters = { colors: [], manaCosts: [], rarities: [] };
+        currentFilters = { colors: [], manaCosts: [], rarities: [], treatments: [] };
         searchCollectionList.value = '';
         updateUIState();
         collectionNameInput.focus();
@@ -1244,7 +1254,7 @@ async function updateCollectionList() {
         }).filter(Boolean); // remove nulls
     }
 
-    const filteredCards = cardsToDisplay.filter(({ card: fullCard }) => {
+    const filteredCards = cardsToDisplay.filter(({ card: fullCard, treatment }) => {
         const colorMatch = !currentFilters.colors.length ||
             (fullCard.color_identity && currentFilters.colors.some(color => fullCard.color_identity.includes(color))) ||
             (fullCard.color_identity?.length === 0 && currentFilters.colors.includes('Colorless')) ||
@@ -1256,7 +1266,10 @@ async function updateCollectionList() {
         const rarityMatch = !currentFilters.rarities.length ||
             currentFilters.rarities.includes(fullCard.rarity.toLowerCase());
 
-        return colorMatch && manaCostMatch && rarityMatch;
+        const treatmentMatch = !currentFilters.treatments.length ||
+            currentFilters.treatments.includes(treatment);
+
+        return colorMatch && manaCostMatch && rarityMatch && treatmentMatch;
     });
 
     sortCards(filteredCards, currentSort.criterion, currentSort.direction);
@@ -1292,36 +1305,25 @@ async function updateCollectionList() {
         setTimeout(() => div.classList.add('added'), 10);
     });
 
-    // Render cards
-    // collectionCardsList.innerHTML = '';
-    // filteredCards.forEach(({ card: fullCard, quantity, treatment }) => {
-    //     const rarity = fullCard.rarity || 'unknown';
-    //     const displayRarity = rarityMap[rarity.toLowerCase()] || rarity.charAt(0).toUpperCase() + rarity.slice(1);
-    //     const div = document.createElement('div');
-    //     div.className = `card-entry ${treatment === 'foil' ? 'foil' : ''}`;
-    //     div.dataset.cardName = fullCard.name;
-    //     div.dataset.typeLine = fullCard.type_line || '';
-    //     div.dataset.oracleText = fullCard.oracle_text || '';
-    //     div.dataset.colorIdentity = fullCard.color_identity ? fullCard.color_identity.join(',') : '';
-    //     div.dataset.cmc = fullCard.cmc || 0;
-    //     div.dataset.rarity = rarity;
-    //     div.dataset.collectorNumber = fullCard.collector_number || '9999';
-    //     const imageUrl = fullCard.image_uris?.normal || '';
-    //     div.innerHTML = `
-    //         ${imageUrl ? `<img src="${imageUrl}" alt="${fullCard.name}" class="${treatment === 'foil' ? 'foil' : ''}">` : '<p>No image available</p>'}
-    //         <table class="card-table">
-    //             <tr>
-    //                 <td class="quantity-cell">${quantity}</td>
-    //                 <td>${fullCard.name}</td>
-    //                 <td title="${rarity}" class="rarity-symbol ${rarity.toLowerCase()} table-rarity-symbol">${displayRarity}</td>
-    //                 <td title="${treatment}">${treatment === 'foil' ? '<span class="foil-star">★</span>' : '<span class="non-foil-dot">•</span>'}</td>
-    //             </tr>
-    //         </table>
-    //     `;
-    //     div.addEventListener('click', () => openCardDetailsModal(fullCard, treatment));
-    //     collectionCardsList.appendChild(div);
-    //     setTimeout(() => div.classList.add('added'), 10);
-    // });
+    const searchValue = searchCollectionList.value?.trim();
+
+    if (filteredCards.length === 0) {
+        if (searchValue) {
+            noCardsInCollectionText.textContent = "No cards found matching your search. Try searching again.";
+        } else if (
+            currentFilters.colors.length > 0 ||
+            currentFilters.manaCosts.length > 0 ||
+            currentFilters.rarities.length > 0 ||
+            currentFilters.treatments?.length > 0
+        ) {
+            noCardsInCollectionText.textContent = "No cards found matching your criteria. Try refining your filters.";
+        } else {
+            noCardsInCollectionText.textContent = "No cards in collection. Use the search at the top to add cards to your collection.";
+        }
+        noCardsInCollectionText.style.display = "flex";
+    } else {
+        noCardsInCollectionText.style.display = "none";
+    }
 
     // Update UI elements
     const totalCards = cardsToDisplay.reduce((sum, c) => sum + c.quantity, 0);
@@ -1331,6 +1333,23 @@ async function updateCollectionList() {
     updateDisplayCount();
     updateUIState();
     if (searchCollectionList.value) searchCollectionDebounced();
+
+    // Show/hide and update the no-cards text
+    if (filteredCards.length === 0) {
+        if (
+            currentFilters.colors.length > 0 ||
+            currentFilters.manaCosts.length > 0 ||
+            currentFilters.rarities.length > 0 ||
+            currentFilters.treatments?.length > 0
+        ) {
+            noCardsInCollectionText.textContent = "No cards found matching your criteria. Try refining your filters.";
+        } else {
+            noCardsInCollectionText.textContent = "No cards in collection. Use the search at the top to add cards to your collection.";
+        }
+        noCardsInCollectionText.style.display = "flex";
+    } else {
+        noCardsInCollectionText.style.display = "none";
+    }
 }
 
 // Apply sort debug function
@@ -1605,9 +1624,22 @@ function filterByRarity(rarity) {
     updateFilterButtonText();
 }
 
+function filterByTreatment(treatment) {
+    const index = currentFilters.treatments.indexOf(treatment);
+    if (index === -1) currentFilters.treatments.push(treatment);
+    else currentFilters.treatments.splice(index, 1);
+
+    document.querySelectorAll('.filter-button-treatment').forEach(btn => btn.classList.remove('active'));
+    currentFilters.treatments.forEach(t => {
+        document.querySelector(`.filter-button-treatment[onclick="filterByTreatment('${t}')"]`)?.classList.add('active');
+    });
+    applyFilters();
+    updateFilterButtonText();
+}
+
 function clearFilters() {
-    currentFilters = { colors: [], manaCosts: [], rarities: [] };
-    document.querySelectorAll('.filter-button, .filter-button-rarity').forEach(btn => btn.classList.remove('active'));
+    currentFilters = { colors: [], manaCosts: [], rarities: [], treatments: [] };
+    document.querySelectorAll('.filter-button, .filter-button-rarity, .filter-button-treatment').forEach(btn => btn.classList.remove('active'));
     applyFilters();
     updateFilterButtonText();
 }
@@ -1726,6 +1758,20 @@ const searchCollectionDebounced = debounce(() => {
     }
 
     updateDisplayCount();
+    let anyVisible = false;
+    for (let i = 0; i < entries.length; i++) {
+        if (entries[i].style.display !== 'none') {
+            anyVisible = true;
+            break;
+        }
+    }
+    if (!anyVisible) {
+        noCardsInCollectionText.textContent = "No cards found matching your search. Try searching again.";
+        noCardsInCollectionText.style.display = "flex";
+    } else {
+        noCardsInCollectionText.style.display = "none";
+    }
+
 }, 300);
 
 searchCollectionList.addEventListener('input', searchCollectionDebounced);
