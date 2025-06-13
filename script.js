@@ -893,9 +893,7 @@ function displayCollectionForDeck() {
         const div = document.createElement('div');
         div.className = 'card-entry';
         const imageUrl = card.image_uris?.normal || '';
-        div.innerHTML =
-            // ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" class="${treatment === 'foil' ? 'foil' : ''}">` : '<p>No image available</p>'}   <-- Original
-            `
+        div.innerHTML =`
             ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}">` : '<p>No image available</p>'}
             <table class="card-table">
                 <tr>
@@ -1228,7 +1226,7 @@ function updateDisplayCount() {
             visibleCards++;
         }
     }
-    displayCount.innerHTML = `Displaying ${visibleCards}/${totalCards} cards </br> • non-foil | ★ foil`;
+    displayCount.innerHTML = `Displaying ${visibleCards}/${totalCards} cards`;
 }
 
 // Add card to collection & Update collection list
