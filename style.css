@@ -1659,21 +1659,22 @@ p {
     top: 0;
     aspect-ratio: 5 / 7;
     width: 100%;
-    background: linear-gradient(120deg,
-            rgb(255, 255, 255) 0%,
-            rgb(0, 255, 255) 7%,
-            rgb(255, 255, 0) 14%,
-            rgb(0, 255, 128) 21%,
-            rgb(128, 0, 255) 28%,
-            rgb(255, 255, 255) 35%,
-            rgb(255, 0, 128) 42%,
-            rgb(255, 255, 255) 50%,
-            rgb(0, 255, 255) 58%,
-            rgb(255, 255, 0) 66%,
-            rgb(0, 255, 128) 74%,
-            rgb(128, 0, 255) 82%,
-            rgb(255, 255, 255) 90%,
-            rgb(255, 0, 128) 100%);
+    background: linear-gradient(
+        120deg,
+        rgb(255, 255, 255) 0%,
+        rgb(0, 255, 255) 7%,
+        rgb(255, 255, 0) 14%,
+        rgb(0, 255, 128) 21%,
+        rgb(128, 0, 255) 28%,
+        rgb(255, 255, 255) 35%,
+        rgb(255, 255, 255) 50%,
+        rgb(0, 255, 255) 58%,
+        rgb(255, 255, 0) 66%,
+        rgb(0, 255, 128) 74%,
+        rgb(128, 0, 255) 82%,
+        rgb(255, 255, 255) 90%,
+        rgb(255, 0, 128) 100%
+    );
     background-size: 200% 200%;
     mix-blend-mode: multiply;
     background-attachment: fixed;
@@ -1683,7 +1684,7 @@ p {
     transition: 300ms;
     animation:
         foil-opacity-oscillate 5s ease-in-out infinite,
-        foil-bg-move 7s linear infinite;
+        foil-bg-move 14s linear infinite;
 }
 
 /* .foil:hover::after {
@@ -1710,8 +1711,12 @@ p {
         background-position: 0% 0%;
     }
 
-    100% {
+    50% {
         background-position: 100% 100%;
+    }
+
+    100% {
+        background-position: 0% 0%;
     }
 }
 
