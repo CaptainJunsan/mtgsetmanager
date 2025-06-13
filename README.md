@@ -1,6 +1,6 @@
 This project is designed to help users create collection JSON files of their Magic: the Gathering card collections.
 
-Current stable version: v1.4.12
+Current stable version: v1.7.5
 
 **HOW TO USE:**
 Please see in the app at the bottom (in the footer). Click the "Need help?" link to learn more about the platform.
