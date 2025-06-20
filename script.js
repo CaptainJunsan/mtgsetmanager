@@ -2075,21 +2075,6 @@ if (importCardsSubmitBtn) {
 
 // Initialize UI and filter icons
 document.addEventListener('DOMContentLoaded', () => {
-    // const closeDeckBtn = document.getElementById('closeDeckBtn');
-    // console.log('closeDeckBtn:', closeDeckBtn);
-    // if (closeDeckBtn) {
-    //     closeDeckBtn.addEventListener('click', closeDeck);
-    // } else {
-    //     console.error('Element with ID "closeDeckBtn" not found');
-    // }
-
-    // const deleteDeckBtn = document.getElementById('deleteDeckBtn');
-    // console.log('deleteDeckBtn:', deleteDeckBtn);
-    // if (deleteDeckBtn) {
-    //     deleteDeckBtn.addEventListener('click', deleteDeck);
-    // } else {
-    //     console.error('Element with ID "deleteDeckBtn" not found');
-    // }
 
     updateUIState();
     initializeFilterIcons();
@@ -2113,8 +2098,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showFeedback(`Sorted by ${sortCriterionSelect.value} (${sortDirectionSelect.value}).`, 'success');
     });
     resetSortButton.addEventListener('click', resetSort);
-    // document.getElementById('closeDeckOption').addEventListener('click', closeDeck);
-    // document.getElementById('deleteDeckOption').addEventListener('click', deleteDeck);
     document.getElementById('deckSelect').addEventListener('change', (e) => {
         selectDeck(e.target.value);
     });
