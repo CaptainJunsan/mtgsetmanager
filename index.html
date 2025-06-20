@@ -73,19 +73,38 @@
             <div class="container-control-row">
                 <div class="title-row">
                     <div class="button-group">
-                        <button class="button primary-button no-class small-button"
+
+                        <!-- THE BOTTOM SELECT MENUS WERE COMMENTED OUT TO INCLUDE TWO BUTTONS THAT OPEN CONTEXT MENUS IN STEAD OF SELECT DROPDOWN MENUS -->
+                        <select id="deckSelect" class="text-input length-medium" disabled>
+                            <option id="deckSelectDefaultOption" value="" selected disabled>Select deck...</option>
+                        </select>
+                        <select id="manageDeckSelect" class="text-input length-medium" onchange="manageDeckActions()">
+                            <option id="manageDeckSelectDefaultOption" value="" selected disabled>Manage decks
+                            </option>
+                            <optgroup>
+                                <option id="createDeckOption" value="createDeck">Create deck</option>
+                                <option id="addCardsToDeckOption" value="addCardsFromCollection">Add cards from
+                                    collection...</option>
+                                <option id="importCardsFromArenaOption" value="importFromArena">Import cards from Arena...
+                                </option>
+                            </optgroup>
+                            <optgroup>
+                                <option id="closeDeckOption" value="close">Close deck</option>
+                                <option id="deleteDeckOption" value="delete">Delete deck</option>
+                            </optgroup>
+                        </select>
+
+                        <!-- THE BOTTOM CONTENT WAS BLOCKED OUT IN FAVOR OF SELECT MENUS, NOW BEING REPLACED BY SIMPLER BUTTONS AND CONTEXT MENUS -->
+                        <!-- <button class="button primary-button no-class small-button"
                             onclick="openCreateDeckModal()">Create Deck</button>
                         <button id="addCardsToDeckBtn" class="button secondary-button no-class small-button"
                             onclick="openAddCardModalWithDestination()">Add cards from Collection</button>
                         <button id="importCardsToDeckBtn" class="button secondary-button no-class small-button"
                             onclick="openImportCardsModal()">Import...</button>
-                        <select id="deckSelect" class="text-input length-medium" disabled>
-                            <option id="deckSelectDefaultOption" value="" selected disabled>Select deck...</option>
-                        </select>
                         <button id="closeDeckBtn" class="button secondary-button no-class small-button" disabled>Close
                             Deck</button>
                         <button id="deleteDeckBtn" class="button secondary-button no-class small-button" disabled>Delete
-                            Deck</button>
+                            Deck</button> -->
                     </div>
                 </div>
             </div>
@@ -194,6 +213,7 @@
             <div id="collectionCardsList" class="card-gallery"></div>
         </div>
     </div>
+
     <div id="editCollectionModal" class="modal">
         <div class="modal-content">
             <span class="svg-close-button" onclick="closeEditCollectionModal()">
@@ -212,6 +232,7 @@
             </div>
         </div>
     </div>
+
     <div id="createDeckModal" class="modal">
         <div class="modal-content">
             <span class="svg-close-button" onclick="closeCreateDeckModal()">
@@ -235,6 +256,7 @@
             </div>
         </div>
     </div>
+
     <div id="addToDeckModal" class="modal">
         <div class="modal-content">
             <span class="svg-close-button" onclick="closeAddToDeckModal()">
@@ -253,6 +275,7 @@
             </div>
         </div>
     </div>
+
     <div id="addCardModal" class="modal">
         <div class="modal-content">
             <span class="svg-close-button" onclick="closeAddCardModal()">
@@ -278,7 +301,9 @@
             <div id="searchResults"></div>
         </div>
     </div>
+
     <div id="cardDetailsModal" class="card-details-modal"></div>
+
     <div id="importCardsModal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="svg-close-button" onclick="closeImportCardsModal()">
@@ -300,6 +325,7 @@
             </div>
         </div>
     </div>
+
     <div id="loadCollectionModal" class="context-modal">
         <div id="contextModalMenu" class="context-modal-content">
             <ul>
@@ -308,6 +334,15 @@
             </ul>
         </div>
     </div>
+
+    <div id="deckSelectMenu" class="context-modal">
+        <div class="context-modal-content" id="deckSelectMenuContent"></div>
+    </div>
+
+    <div id="manageDeckMenu" class="context-modal">
+        <div class="context-modal-content" id="manageDeckMenuContent"></div>
+    </div>
+
     <div id="referencesModal" class="references-modal">
         <div class="modal-content">
             <h2 class="title">References</h2>
@@ -326,6 +361,7 @@
             <button class="button secondary-button small-button" onclick="closeReferencesModal()">Close</button>
         </div>
     </div>
+
     <div id="helpCentreModal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="svg-close-button" onclick="closeHelpCentreModal()">
@@ -396,7 +432,7 @@
         </div>
     </div>
     <footer>
-        <p>Collection Manager v1.7.7 © Mr. Bojangles 2025 | <a onclick="openReferencesModal()">References</a> | <a
+        <p>Collection Manager v1.9.3 © Mr. Bojangles 2025 | <a onclick="openReferencesModal()">References</a> | <a
                 onclick="openHelpCentreModal()">Need help?</a></p>
     </footer>
     <input type="file" id="fileInput" style="display: none;">

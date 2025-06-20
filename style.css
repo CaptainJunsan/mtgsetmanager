@@ -1991,6 +1991,17 @@ body *::-webkit-scrollbar {
     font-style: italic;
 }
 
+#manageDeckSelect {
+    cursor: pointer;
+}
+
+#createDeckOption {
+    /* background-color: #ec5915; */
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    /* color: #e0e0e0; */
+}
+
 @media (max-width: 1470px) {
     #mainHeader {
         flex-direction: column;

@@ -57,6 +57,13 @@ const mainHeader = document.getElementById('mainHeader');
 const menuBar = document.getElementById('menuBar');
 const viewModeLabel = document.getElementById('viewModeLabel');
 const syntaxIdeas = document.getElementById('syntaxIdeas');
+const manageDeckSelect = document.getElementById('manageDeckSelect');
+const manageDeckSelectDefaultOption = document.getElementById('manageDeckSelectDefaultOption');
+const createDeckOption = document.getElementById('createDeckOption');
+const addCardsToDeckOption = document.getElementById('addCardsToDeckOption');
+const importCardsFromArenaOption = document.getElementById('importCardsFromArenaOption');
+const closeDeckOption = document.getElementById('closeDeckOption');
+const deleteDeckOption = document.getElementById('deleteDeckOption');
 // const sortFilterControlsContainer = document.getElementById('sortFilterControlsContainer');
 
 // Google Drive API configuration
@@ -732,12 +739,48 @@ function deleteDeck() {
 function updateDeckControlButtons() {
     const isDeckSelected = currentView !== 'collection';
 
-    closeDeckBtn.disabled = !isDeckSelected;
-    deleteDeckBtn.disabled = !isDeckSelected;
-    // deckSelect.style.cursor = !isDeckSelected ? 'not-allowed' : 'pointer';
     deckSelect.style.opacity = !isDeckSelected ? '0.5' : '1';
-    addCardsToDeckBtn.disabled = !isDeckSelected;
-    importCardsToDeckBtn.disabled = !isDeckSelected;
+
+    // addCardsToDeckBtn.disabled = !isDeckSelected;
+    addCardsToDeckOption.disabled = !isDeckSelected;
+
+    // importCardsToDeckBtn.disabled = !isDeckSelected;
+    importCardsFromArenaOption.disabled = !isDeckSelected;
+
+    // closeDeckBtn.disabled = !isDeckSelected;
+    closeDeckOption.disabled = !isDeckSelected;
+
+    // deleteDeckBtn.disabled = !isDeckSelected;
+    deleteDeckOption.disabled = !isDeckSelected;
+}
+
+// Respond to Deck Management select menu
+function manageDeckActions() {
+    const selectedValue = manageDeckSelect.value;
+
+    switch (selectedValue) {
+        case 'createDeck':
+            // Open Create Deck Modal
+            openCreateDeckModal();
+            manageDeckSelect.value = "";
+            break;
+        case 'addCardsFromCollection':
+            // Open Add Cards with Destination modal
+            openAddCardModalWithDestination();
+            manageDeckSelect.value = "";
+            break;
+        case 'importFromArena':
+            // Open Import from Arena Modal
+            openImportCardsModal();
+            manageDeckSelect.value = "";
+            break;
+        case 'close':
+            // Close current deck
+        case 'delete':
+            // Delete current deck
+        default:
+        // Do nothing
+    }
 }
 
 // Close the Edit Collection Modal
@@ -893,7 +936,7 @@ function displayCollectionForDeck() {
         const div = document.createElement('div');
         div.className = 'card-entry';
         const imageUrl = card.image_uris?.normal || '';
-        div.innerHTML =`
+        div.innerHTML = `
             ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}">` : '<p>No image available</p>'}
             <table class="card-table">
                 <tr>
@@ -2028,21 +2071,21 @@ if (importCardsSubmitBtn) {
 
 // Initialize UI and filter icons
 document.addEventListener('DOMContentLoaded', () => {
-    const closeDeckBtn = document.getElementById('closeDeckBtn');
-    console.log('closeDeckBtn:', closeDeckBtn);
-    if (closeDeckBtn) {
-        closeDeckBtn.addEventListener('click', closeDeck);
-    } else {
-        console.error('Element with ID "closeDeckBtn" not found');
-    }
+    // const closeDeckBtn = document.getElementById('closeDeckBtn');
+    // console.log('closeDeckBtn:', closeDeckBtn);
+    // if (closeDeckBtn) {
+    //     closeDeckBtn.addEventListener('click', closeDeck);
+    // } else {
+    //     console.error('Element with ID "closeDeckBtn" not found');
+    // }
 
-    const deleteDeckBtn = document.getElementById('deleteDeckBtn');
-    console.log('deleteDeckBtn:', deleteDeckBtn);
-    if (deleteDeckBtn) {
-        deleteDeckBtn.addEventListener('click', deleteDeck);
-    } else {
-        console.error('Element with ID "deleteDeckBtn" not found');
-    }
+    // const deleteDeckBtn = document.getElementById('deleteDeckBtn');
+    // console.log('deleteDeckBtn:', deleteDeckBtn);
+    // if (deleteDeckBtn) {
+    //     deleteDeckBtn.addEventListener('click', deleteDeck);
+    // } else {
+    //     console.error('Element with ID "deleteDeckBtn" not found');
+    // }
 
     updateUIState();
     initializeFilterIcons();
@@ -2066,8 +2109,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showFeedback(`Sorted by ${sortCriterionSelect.value} (${sortDirectionSelect.value}).`, 'success');
     });
     resetSortButton.addEventListener('click', resetSort);
-    document.getElementById('closeDeckBtn').addEventListener('click', closeDeck);
-    document.getElementById('deleteDeckBtn').addEventListener('click', deleteDeck);
+    // document.getElementById('closeDeckBtn').addEventListener('click', closeDeck);
+    // document.getElementById('deleteDeckBtn').addEventListener('click', deleteDeck);
     document.getElementById('deckSelect').addEventListener('change', (e) => {
         selectDeck(e.target.value);
     });
