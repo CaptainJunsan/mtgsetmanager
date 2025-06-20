@@ -776,8 +776,12 @@ function manageDeckActions() {
             break;
         case 'close':
             // Close current deck
+            closeDeck();
+            manageDeckSelect.value = "";
         case 'delete':
             // Delete current deck
+            deleteDeck();
+            manageDeckSelect.value = "";
         default:
         // Do nothing
     }
@@ -2109,8 +2113,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showFeedback(`Sorted by ${sortCriterionSelect.value} (${sortDirectionSelect.value}).`, 'success');
     });
     resetSortButton.addEventListener('click', resetSort);
-    // document.getElementById('closeDeckBtn').addEventListener('click', closeDeck);
-    // document.getElementById('deleteDeckBtn').addEventListener('click', deleteDeck);
+    // document.getElementById('closeDeckOption').addEventListener('click', closeDeck);
+    // document.getElementById('deleteDeckOption').addEventListener('click', deleteDeck);
     document.getElementById('deckSelect').addEventListener('change', (e) => {
         selectDeck(e.target.value);
     });
