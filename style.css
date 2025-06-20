@@ -661,6 +661,10 @@ p {
     font-weight: 300;
 }
 
+#collectionCardsList {
+    border-radius: 7px;
+}
+
 #collectionCardCount {
     font-family: 'Inter', sans-serif;
     color: #e0e0e0;
